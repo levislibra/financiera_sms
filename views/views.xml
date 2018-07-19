@@ -1,0 +1,124 @@
+<openerp>
+  <data>
+
+    <!-- Financiera SMS -->
+
+    <record model="ir.ui.view" id="financiera_sms_tree">
+      <field name="name">financiera.sms</field>
+      <field name="model">financiera.sms</field>
+      <field name="arch" type="xml">
+        <tree create="false" delete="false">
+          <field name="name"/>
+        </tree>
+      </field>
+    </record>
+
+    <record id="financiera_sms_form" model="ir.ui.view">
+        <field name="name">financiera.sms</field>
+        <field name="model">financiera.sms</field>
+        <field name="arch" type="xml">
+            <form string="Configuracion" create="false" delete="false">
+                <header>
+                  <button name="actualizar_saldo" string="Actualizar saldo sms" type="object" />
+                  <button name="send_sms_test" string="Enviar sms test" type="object" />
+                  <button name="all_notification" string="Enviar notificaciones" type="object" />
+                </header>
+                <sheet>
+                    <group>
+                      <group string="Información conexión">
+                        <field name="usuario"/>
+                        <field name="password" password="True"/>
+                        <field name="sms_saldo" readonly="1"/>
+                      </group>
+                      <group string="Información para test">
+                        <field name="sms_numero_test"/>
+                        <field name="sms_texto_test"/>
+                      </group>
+                    </group>
+                    <group string="Personalizacion de envios de sms">
+                      <field name="sms_preventiva"/>
+                      <field name="sms_preventiva_count" attrs="{'invisible': [('sms_preventiva', '=', False)], 'required': [('sms_preventiva', '=', True)]}"/>
+                      <field name="sms_preventiva_dias" attrs="{'invisible': [('sms_preventiva', '=', False)], 'required': [('sms_preventiva', '=', True)]}"/>
+                      <field name="sms_preventiva_text" attrs="{'invisible': [('sms_preventiva', '=', False)], 'required': [('sms_preventiva', '=', True)]}"/>
+                      <label for="codigos" string='Codigos' attrs="{'invisible': [('sms_preventiva', '=', False)]}"/><label name="codigos" string="#nombre_cliente, #monto_cuota, #vencimiento_cuota, #nro_cuota" attrs="{'invisible': [('sms_preventiva', '=', False)]}"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record model="ir.actions.act_window" id="financiera_sms_action">
+      <field name="name">Configuracion</field>
+      <field name="res_model">financiera.sms</field>
+      <field name="view_mode">tree,form</field>
+      <field name="view_id" ref="financiera_sms_tree"/>
+    </record>
+
+    <!-- Vista Form Prestamo -->
+
+    <record id="prestamo_form_inherited"  model="ir.ui.view">
+      <field name="name">Extension Prestamo form</field>
+      <field name="model">financiera.prestamo</field>
+      <field name="inherit_id" ref="financiera_prestamos.financiera_prestamo_form"/>
+      <field name="arch" type="xml">
+        <xpath expr="//field[@name='saldo_a_pagar']" position="after">
+          <field name="sms_prestamo_notification"/>
+        </xpath>
+      </field>
+    </record>
+
+    <!-- Vista Form Cuota -->
+
+    <record id="cuota_form_inherited"  model="ir.ui.view">
+      <field name="name">Extension Cuota form</field>
+      <field name="model">financiera.prestamo.cuota</field>
+      <field name="inherit_id" ref="financiera_prestamos.financiera_prestamo_cuota_form"/>
+      <field name="arch" type="xml">
+        <xpath expr="//page[1]" position='after'>
+          <page string='Notificaciones sms'>
+            <group>
+              <field name="sms_preventiva_count" readonly="1"/>
+              <field name="sms_preventiva_dias" readonly="1"/>
+            </group>
+              <field name="sms_notification_ids">
+                <tree>
+                  <field name="sms_fecha"/>
+                  <field name="sms_texto"/>
+                  <field name="sms_mobil"/>
+                  <field name="sms_mora_tipo"/>
+                  <field name="sms_resultado"/>
+                </tree>
+              </field>
+          </page>
+        </xpath>
+      </field>
+    </record>
+
+    <!-- Vista Form Partner -->
+
+    <record id="partner_form_inherited"  model="ir.ui.view">
+      <field name="name">Extension Partner form</field>
+      <field name="model">res.partner</field>
+      <field name="inherit_id" ref="base.view_partner_form"/>
+      <field name="arch" type="xml">
+        <xpath expr="//field[@name='mobile']" position="after">
+          <field name="sms_prestamo_notification"/>
+        </xpath>
+        <xpath expr="//field[@name='mobile']" position="attributes">
+          <attribute name="attrs">{'required': [('sms_prestamo_notification', '=', True)]}</attribute>
+        </xpath>
+      </field>
+    </record>
+
+    <!-- Top menu item -->
+    
+    <menuitem name="Notificaciones SMS" id="menu_sms" web_icon="financiera_sms,static/description/icon.png" groups="financiera_prestamos.manager,financiera_prestamos.user"/>
+    
+    <!-- menu categories -->
+    
+    <menuitem name="Configuracion" id="menu_config" sequence="0" parent="menu_sms"/>
+
+    <menuitem name="Configuracion" id="menu_sms_config_action" sequence="100" parent="menu_config" action="financiera_sms_action"/>
+
+  </data>
+</openerp>

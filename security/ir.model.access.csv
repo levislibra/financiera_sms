@@ -1,0 +1,2 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_financiera_sms_financiera_sms,financiera_sms.financiera_sms,model_financiera_sms_financiera_sms,,1,0,0,0
