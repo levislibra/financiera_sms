@@ -21,6 +21,27 @@ class FinancieraSms(models.Model):
 	sms_preventiva_count = fields.Integer('Cuantos sms se deberan enviar en Preventiva?')
 	sms_preventiva_dias = fields.Integer('Cada cuntos dias se deben enviar los sms')
 	sms_preventiva_text = fields.Text('Texto a enviar en Preventiva', size=120)
+	# Cuota en mora temprana
+	sms_mora_temprana = fields.Boolean('Enviar sms en Mora Temprana?')
+	sms_mora_temprana_count = fields.Integer('Cuantos sms se deberan enviar en Mora Temprana?')
+	sms_mora_temprana_dias = fields.Integer('Cada cuntos dias se deben enviar los sms')
+	sms_mora_temprana_text = fields.Text('Texto a enviar en Mora Temprana', size=120)
+	# Cuota en mora media
+	sms_mora_media = fields.Boolean('Enviar sms en Mora Media?')
+	sms_mora_media_count = fields.Integer('Cuantos sms se deberan enviar en Mora Media?')
+	sms_mora_media_dias = fields.Integer('Cada cuntos dias se deben enviar los sms')
+	sms_mora_media_text = fields.Text('Texto a enviar en Mora Media', size=120)
+	# Cuota en mora tardia
+	sms_mora_tardia = fields.Boolean('Enviar sms en Mora Tardia?')
+	sms_mora_tardia_count = fields.Integer('Cuantos sms se deberan enviar en Mora Tardia?')
+	sms_mora_tardia_dias = fields.Integer('Cada cuntos dias se deben enviar los sms')
+	sms_mora_tardia_text = fields.Text('Texto a enviar en Mora Tardia', size=120)
+	# Cuota en incobrables
+	sms_incobrable = fields.Boolean('Enviar sms en Incobrable?')
+	sms_incobrable_count = fields.Integer('Cuantos sms se deberan enviar en Incobrable?')
+	sms_incobrable_dias = fields.Integer('Cada cuntos dias se deben enviar los sms')
+	sms_incobrable_text = fields.Text('Texto a enviar en Incobrable', size=120)
+
 
 	@api.one
 	def actualizar_saldo(self):
@@ -47,61 +68,94 @@ class FinancieraSms(models.Model):
 			('state', 'in', ('activa', 'facturado')),
 			('state_mora', '!=', 'normal'),
 		])
-		print "ALL NOTIFICATION"
-		print cuota_ids
 		for _id in cuota_ids:
 			cuota_id = cuota_obj.browse(cr, uid, _id)
 			sms_send = cuota_id.cliente_id.sms_prestamo_notification and cuota_id.prestamo_id.sms_prestamo_notification
-			print "sms_send:: "+str(sms_send)
 			if sms_send:
-				nombre_cliente = cuota_id.cliente_id.name
-				numero_cliente = cuota_id.cliente_id.mobile
-				monto_cuota = cuota_id.saldo
-				vencimiento_cuota = cuota_id.fecha_vencimiento
-				nro_cuota = cuota_id.numero_cuota
 				state_mora = cuota_id.state_mora
 				fpcn_values = None
 				if state_mora == 'preventiva' and self.sms_preventiva:
-					print "estamos en preventiva y sms_preventiva send"
-					sms_count_condition = cuota_id.sms_preventiva_count < self.sms_preventiva_count
-					sms_dias_condition = cuota_id.sms_preventiva_dias == 0 or cuota_id.sms_preventiva_dias == self.sms_preventiva_dias
-					if sms_count_condition and sms_dias_condition:
-						print "se envia mensajeeeeeeeeeeee"
-						sms_preventiva_text = self.sms_preventiva_text
-						sms_preventiva_text = sms_preventiva_text.replace("#nombre_cliente", nombre_cliente)
-						sms_preventiva_text = sms_preventiva_text.replace("#monto_cuota", str(monto_cuota))
-						sms_preventiva_text = sms_preventiva_text.replace("#vencimiento_cuota", str(vencimiento_cuota))
-						sms_preventiva_text = sms_preventiva_text.replace("#nro_cuota", str(nro_cuota))
-						# params = {
-						# 	'usuario': self.usuario,
-						# 	'clave': self.password,
-						# 	'tos': self.numero_cliente,
-						# 	'texto': self.sms_preventiva_text,
-						# }
-						# r = requests.get('http://servicio.smsmasivos.com.ar/enviar_sms.asp?api=1', params=params)
-						fpcn_values = {
-							#'sms_cuota_id': cuota_id.id,
-							'sms_mobil': numero_cliente,
-							'sms_texto': sms_preventiva_text,
-							'sms_mora_tipo': 'preventiva',
-							'sms_resultado': 'Demo',
-						}
-						cuota_id.sms_preventiva_count += 1
-						cuota_id.sms_preventiva_dias = 1
-					else:
-						cuota_id.sms_preventiva_dias += 1
-				elif state_mora == 'moraTemprana':
-					pass
+					self.send_sms(cuota_id, state_mora, cuota_id.sms_preventiva_count,
+						cuota_id.sms_preventiva_dias, self.sms_preventiva_count,
+						self.sms_preventiva_dias, self.sms_preventiva_text)
+				elif state_mora == 'moraTemprana' and self.sms_mora_temprana:
+					self.send_sms(cuota_id,	state_mora,	cuota_id.sms_mora_temprana_count,
+						cuota_id.sms_mora_temprana_dias, self.sms_mora_temprana_count,
+						self.sms_mora_temprana_dias, self.sms_mora_temprana_text)
 				elif state_mora == 'moraMedia':
-					pass
+					self.send_sms(cuota_id,	state_mora,	cuota_id.sms_mora_media_count,
+						cuota_id.sms_mora_media_dias, self.sms_mora_media_count,
+						self.sms_mora_media_dias, self.sms_mora_media_text)
 				elif state_mora == 'moraTardia':
-					pass
+					self.send_sms(cuota_id,	state_mora,	cuota_id.sms_mora_tardia_count,
+						cuota_id.sms_mora_tardia_dias, self.sms_mora_tardia_count,
+						self.sms_mora_tardia_dias, self.sms_mora_tardia_text)
 				elif state_mora == 'incobrable':
-					pass
-				if fpcn_values != None:
-					sms_notification_id = self.env['financiera.prestamo.cuota.notificacion'].create(fpcn_values)
-					cuota_id.sms_notification_ids = [sms_notification_id.id]
-			
+					self.send_sms(cuota_id,	state_mora, cuota_id.sms_incobrable_count,
+						cuota_id.sms_incobrable_dias, self.sms_incobrable_count,
+						self.sms_incobrable_dias, self.sms_incobrable_text)
+
+	@api.one
+	def send_sms(self, cuota_id, state_mora, sms_cuota_count, sms_cuota_dias, sms_config_count, sms_config_dias, sms_config_text):
+		nombre_cliente = cuota_id.cliente_id.name
+		numero_cliente = cuota_id.cliente_id.mobile
+		monto_cuota = cuota_id.saldo
+		vencimiento_cuota = cuota_id.fecha_vencimiento
+		vencimiento_cuota = datetime.strptime(vencimiento_cuota, "%Y-%m-%d")
+		nro_cuota = cuota_id.numero_cuota
+		sms_count_condition = sms_cuota_count < sms_config_count
+		sms_dias_condition = sms_cuota_dias == 0 or sms_cuota_dias == sms_config_dias
+		if sms_count_condition and sms_dias_condition:
+			print "se envia mensajeeeeeeeeeeee"
+			sms_text = sms_config_text
+			sms_text = sms_text.replace("#nombre_cliente", nombre_cliente)
+			sms_text = sms_text.replace("#monto_cuota", str(monto_cuota))
+			sms_text = sms_text.replace("#vencimiento_cuota", vencimiento_cuota.strftime('%d de %b de %Y'))
+			sms_text = sms_text.replace("#nro_cuota", str(nro_cuota))
+			result = 'Demo'
+			# params = {
+			# 	'usuario': self.usuario,
+			# 	'clave': self.password,
+			# 	'tos': self.numero_cliente,
+			# 	'texto': sms_text,
+			# }
+			# r = requests.get('http://servicio.smsmasivos.com.ar/enviar_sms.asp?api=1', params=params)
+			#result = r.content
+			fpcn_values = {
+				'sms_mobil': numero_cliente,
+				'sms_texto': sms_text,
+				'sms_mora_tipo': state_mora,
+				'sms_resultado': result,
+			}
+			sms_notification_id = self.env['financiera.prestamo.cuota.notificacion'].create(fpcn_values)
+			cuota_id.sms_notification_ids = [sms_notification_id.id]
+			if state_mora == 'preventiva':
+				cuota_id.sms_preventiva_count += 1
+				cuota_id.sms_preventiva_dias = 1
+			elif state_mora == 'moraTemprana':
+				cuota_id.sms_mora_temprana_count += 1
+				cuota_id.sms_mora_temprana_dias = 1
+			elif state_mora == 'moraMedia':
+				cuota_id.sms_mora_media_count += 1
+				cuota_id.sms_mora_media_dias = 1
+			elif state_mora == 'moraTardia':
+				cuota_id.sms_mora_tardia_count += 1
+				cuota_id.sms_mora_tardia_dias = 1
+			elif state_mora == 'incobrable':
+				cuota_id.sms_incobrable_count += 1
+				cuota_id.sms_incobrable_dias = 1
+		else:
+			if state_mora == 'preventiva':
+				cuota_id.sms_preventiva_dias += 1
+			elif state_mora == 'moraTemprana':
+				cuota_id.sms_mora_temprana_dias += 1
+			elif state_mora == 'moraMedia':
+				cuota_id.sms_mora_media_dias += 1
+			elif state_mora == 'moraTardia':
+				cuota_id.sms_mora_tardia_dias += 1
+			elif state_mora == 'incobrable':
+				cuota_id.sms_incobrable_dias += 1
+
 class ExtendsFinancieraPrestamo(models.Model):
 	_name = 'financiera.prestamo'
 	_inherit = 'financiera.prestamo'
@@ -118,9 +172,21 @@ class ExtendsFinancieraPrestamoCuota(models.Model):
 	_inherit = 'financiera.prestamo.cuota'
 
 	sms_notification_ids = fields.One2many("financiera.prestamo.cuota.notificacion", "sms_cuota_id", "Notificaciones sms")
-	
+	# SMS Preventiva
 	sms_preventiva_count = fields.Integer('Sms enviados en Preventiva?', default=0)
 	sms_preventiva_dias = fields.Integer('Dias desde el ultimo envio', default=0)
+	# SMS Mora Temprana
+	sms_mora_temprana_count = fields.Integer('Sms enviados en Mora Temprana?', default=0)
+	sms_mora_temprana_dias = fields.Integer('Dias desde el ultimo envio', default=0)
+	# SMS Mora Media
+	sms_mora_media_count = fields.Integer('Sms enviados en Mora Media?', default=0)
+	sms_mora_media_dias = fields.Integer('Dias desde el ultimo envio', default=0)	
+	# SMS Mora Tardia
+	sms_mora_tardia_count = fields.Integer('Sms enviados en Mora Tardia?', default=0)
+	sms_mora_tardia_dias = fields.Integer('Dias desde el ultimo envio', default=0)
+	# SMS Incobrable
+	sms_incobrable_count = fields.Integer('Sms enviados en Incobrable?', default=0)
+	sms_incobrable_dias = fields.Integer('Dias desde el ultimo envio', default=0)
 
 class FinancieraPrestamoCuotaNotificacion(models.Model):
 	_name = 'financiera.prestamo.cuota.notificacion'

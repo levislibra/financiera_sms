@@ -35,12 +35,40 @@
                         <field name="sms_texto_test"/>
                       </group>
                     </group>
-                    <group string="Personalizacion de envios de sms">
+                    <group string="SMS en Preventiva">
                       <field name="sms_preventiva"/>
                       <field name="sms_preventiva_count" attrs="{'invisible': [('sms_preventiva', '=', False)], 'required': [('sms_preventiva', '=', True)]}"/>
                       <field name="sms_preventiva_dias" attrs="{'invisible': [('sms_preventiva', '=', False)], 'required': [('sms_preventiva', '=', True)]}"/>
                       <field name="sms_preventiva_text" attrs="{'invisible': [('sms_preventiva', '=', False)], 'required': [('sms_preventiva', '=', True)]}"/>
                       <label for="codigos" string='Codigos' attrs="{'invisible': [('sms_preventiva', '=', False)]}"/><label name="codigos" string="#nombre_cliente, #monto_cuota, #vencimiento_cuota, #nro_cuota" attrs="{'invisible': [('sms_preventiva', '=', False)]}"/>
+                    </group>
+                    <group string="SMS en Mora Temprana">
+                      <field name="sms_mora_temprana"/>
+                      <field name="sms_mora_temprana_count" attrs="{'invisible': [('sms_mora_temprana', '=', False)], 'required': [('sms_mora_temprana', '=', True)]}"/>
+                      <field name="sms_mora_temprana_dias" attrs="{'invisible': [('sms_mora_temprana', '=', False)], 'required': [('sms_mora_temprana', '=', True)]}"/>
+                      <field name="sms_mora_temprana_text" attrs="{'invisible': [('sms_mora_temprana', '=', False)], 'required': [('sms_mora_temprana', '=', True)]}"/>
+                      <label for="codigos" string='Codigos' attrs="{'invisible': [('sms_mora_temprana', '=', False)]}"/><label name="codigos" string="#nombre_cliente, #monto_cuota, #vencimiento_cuota, #nro_cuota" attrs="{'invisible': [('sms_mora_temprana', '=', False)]}"/>
+                    </group>
+                    <group string="SMS en Mora Media">
+                      <field name="sms_mora_media"/>
+                      <field name="sms_mora_media_count" attrs="{'invisible': [('sms_mora_media', '=', False)], 'required': [('sms_mora_media', '=', True)]}"/>
+                      <field name="sms_mora_media_dias" attrs="{'invisible': [('sms_mora_media', '=', False)], 'required': [('sms_mora_media', '=', True)]}"/>
+                      <field name="sms_mora_media_text" attrs="{'invisible': [('sms_mora_media', '=', False)], 'required': [('sms_mora_media', '=', True)]}"/>
+                      <label for="codigos" string='Codigos' attrs="{'invisible': [('sms_mora_media', '=', False)]}"/><label name="codigos" string="#nombre_cliente, #monto_cuota, #vencimiento_cuota, #nro_cuota" attrs="{'invisible': [('sms_mora_media', '=', False)]}"/>
+                    </group>
+                    <group string="SMS en Mora Tardia">
+                      <field name="sms_mora_tardia"/>
+                      <field name="sms_mora_tardia_count" attrs="{'invisible': [('sms_mora_tardia', '=', False)], 'required': [('sms_mora_tardia', '=', True)]}"/>
+                      <field name="sms_mora_tardia_dias" attrs="{'invisible': [('sms_mora_tardia', '=', False)], 'required': [('sms_mora_tardia', '=', True)]}"/>
+                      <field name="sms_mora_tardia_text" attrs="{'invisible': [('sms_mora_tardia', '=', False)], 'required': [('sms_mora_tardia', '=', True)]}"/>
+                      <label for="codigos" string='Codigos' attrs="{'invisible': [('sms_mora_tardia', '=', False)]}"/><label name="codigos" string="#nombre_cliente, #monto_cuota, #vencimiento_cuota, #nro_cuota" attrs="{'invisible': [('sms_mora_tardia', '=', False)]}"/>
+                    </group>
+                    <group string="SMS en Incobrable">
+                      <field name="sms_incobrable"/>
+                      <field name="sms_incobrable_count" attrs="{'invisible': [('sms_incobrable', '=', False)], 'required': [('sms_incobrable', '=', True)]}"/>
+                      <field name="sms_incobrable_dias" attrs="{'invisible': [('sms_incobrable', '=', False)], 'required': [('sms_incobrable', '=', True)]}"/>
+                      <field name="sms_incobrable_text" attrs="{'invisible': [('sms_incobrable', '=', False)], 'required': [('sms_incobrable', '=', True)]}"/>
+                      <label for="codigos" string='Codigos' attrs="{'invisible': [('sms_incobrable', '=', False)]}"/><label name="codigos" string="#nombre_cliente, #monto_cuota, #vencimiento_cuota, #nro_cuota" attrs="{'invisible': [('sms_incobrable', '=', False)]}"/>
                     </group>
                 </sheet>
             </form>
@@ -77,8 +105,28 @@
         <xpath expr="//page[1]" position='after'>
           <page string='Notificaciones sms'>
             <group>
-              <field name="sms_preventiva_count" readonly="1"/>
-              <field name="sms_preventiva_dias" readonly="1"/>
+              <group string="SMS en Preventiva">
+                <field name="sms_preventiva_count" readonly="1"/>
+                <field name="sms_preventiva_dias" readonly="1"/>
+              </group>
+              <group string="SMS en Mora Temprana">
+                <field name="sms_mora_temprana_count" readonly="1"/>
+                <field name="sms_mora_temprana_dias" readonly="1"/>
+              </group>
+            </group>
+            <group>
+              <group string="SMS en Mora Media">
+                <field name="sms_mora_media_count" readonly="1"/>
+                <field name="sms_mora_media_dias" readonly="1"/>
+              </group>
+              <group string="SMS en Mora Tardia">
+                <field name="sms_mora_tardia_count" readonly="1"/>
+                <field name="sms_mora_tardia_dias" readonly="1"/>
+              </group>
+              <group string="SMS en Incobrable">
+                <field name="sms_incobrable_count" readonly="1"/>
+                <field name="sms_incobrable_dias" readonly="1"/>
+              </group>
             </group>
               <field name="sms_notification_ids">
                 <tree>
