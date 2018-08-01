@@ -11,8 +11,8 @@ class FinancieraSms(models.Model):
 	_name = 'financiera.sms'
 
 	name = fields.Char('Nombre', defualt='Configuracion general', readonly=True, required=True)
-	usuario = fields.Char('Usuario', required=True)
-	password = fields.Char('Password', required=True)
+	usuario = fields.Char('Usuario')
+	password = fields.Char('Password')
 	sms_saldo = fields.Integer('SMS restantes')
 	sms_numero_test = fields.Char('Movil test')
 	sms_texto_test = fields.Char('Mensaje test', size=120)
