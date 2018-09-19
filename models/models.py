@@ -57,7 +57,6 @@ class FinancieraSms(models.Model):
 			'texto': self.sms_texto_test,
 		}
 		r = requests.get('http://servicio.smsmasivos.com.ar/enviar_sms.asp?api=1', params=params)
-		#print r.content == 'OK'
 
 	@api.one
 	def all_notification(self):
@@ -106,7 +105,6 @@ class FinancieraSms(models.Model):
 		sms_count_condition = sms_cuota_count < sms_config_count
 		sms_dias_condition = sms_cuota_dias == 0 or sms_cuota_dias == sms_config_dias
 		if sms_count_condition and sms_dias_condition:
-			print "se envia mensajeeeeeeeeeeee"
 			sms_text = sms_config_text
 			sms_text = sms_text.replace("#nombre_cliente", nombre_cliente)
 			sms_text = sms_text.replace("#monto_cuota", str(monto_cuota))
