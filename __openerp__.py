@@ -25,9 +25,11 @@
     'data': [
         'security/user_groups.xml',
         'security/ir.model.access.csv',
-        'views/views.xml',
-        'views/templates.xml',
-        'data/defaultdata.xml'
+        'security/security.xml',
+        'views/sms_configuracion.xml',
+        'views/sms_message.xml',
+        'views/extends_res_company.xml',
+        'data/ir_cron.xml',
     ],
     # only loaded in demonstration mode
     'demo': [

@@ -1,5 +1,6 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-user_financiera_sms,financiera.sms,model_financiera_sms,financiera_sms.user,1,1,1,0
-manager_financiera_sms,financiera.sms,model_financiera_sms,financiera_sms.manager,1,1,1,1
-user_financiera_prestamo_cuota_notificacion,financiera.prestamo.cuota.notificacion,model_financiera_prestamo_cuota_notificacion,financiera_sms.user,1,1,1,0
-manager_financiera_prestamo_cuota_notificacion,financiera.prestamo.cuota.notificacion,model_financiera_prestamo_cuota_notificacion,financiera_sms.manager,1,1,1,1
+manager_financiera_sms_config,financiera.sms.config,model_financiera_sms_config,financiera_sms.manager,1,1,1,1
+user_financiera_sms_config,financiera.sms.config,model_financiera_sms_config,financiera_sms.user,1,0,0,0
+
+manager_financiera_sms_message,financiera.sms.message,model_financiera_sms_message,financiera_sms.manager,1,1,1,0
+user_financiera_sms_message,financiera.sms.message,model_financiera_sms_message,financiera_sms.user,1,1,1,0

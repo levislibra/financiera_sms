@@ -1,0 +1,133 @@
+<openerp>
+  <data>
+
+    <!-- Financiera Whatsapp configuracion -->
+
+    <record model="ir.ui.view" id="financiera_sms_conf_tree">
+      <field name="name">financiera.sms.config.tree</field>
+      <field name="model">financiera.sms.config</field>
+      <field name="arch" type="xml">
+        <tree create="false" delete="false">
+          <field name="name"/>
+          <field name="company_id" groups="base.group_erp_manager"/>
+        </tree>
+      </field>
+    </record>
+
+    <record id="financiera_sms_conf_form" model="ir.ui.view">
+        <field name="name">financiera.sms.config.form</field>
+        <field name="model">financiera.sms.config</field>
+        <field name="arch" type="xml">
+            <form string="Configuracion" create="false" delete="false">
+                <header>
+                  <button name="actualizar_saldo" string="Actualizar saldo" type="object"/>
+                  <button name="send_sms_test" string="Enviar mensaje de prueba" type="object"/>
+                </header>
+                <sheet>
+                  <group>
+                    <group>
+                      <field name="company_id" groups="base.group_erp_manager"/>
+                      <field name="name"/>
+                      <separate string="Información conexión" colspan="2"/>
+                      <field name="usuario"/>
+                      <field name="password" password="True"/>
+                      <field name="sms_saldo" readonly="1"/>
+                    </group>
+                    <group string="Prueba de conexión">
+                      <field name="sms_numero_test"/>
+                      <field name="sms_texto_test"/>
+                    </group>
+                  </group>
+                  <notebook>
+                    <page string="Mensaje preventivo">
+                      <group>
+                        <group>
+                          <field name="preventivo_activar"/>
+                          <field name="preventivo_mensaje"
+                            placeholder="Hola {{1}}. Su cuota de monto {{2}}, vence el {{3}}."
+                            attrs="{'invisible': [('preventivo_activar', '=', False)], 'required': [('preventivo_activar', '=', True)]}"/>
+                          <field name="preventivo_dias_antes" attrs="{'invisible': [('preventivo_activar', '=', False)], 'required': [('preventivo_activar', '=', True)]}"/>
+                          <field name="preventivo_activar_segundo_envio" attrs="{'invisible': [('preventivo_activar', '=', False)]}"/>
+                          <field name="preventivo_segundo_envio_dias_antes" attrs="{'invisible': ['|', ('preventivo_activar', '=', False), ('preventivo_activar_segundo_envio', '=', False)]}"/>
+                        </group>
+                        <group>
+                          <field name="preventivo_var_1" readonly="1"/>
+                          <field name="preventivo_var_2" readonly="1"/>
+                          <field name="preventivo_var_3" readonly="1"/>
+                        </group>
+                      </group>
+                    </page>
+                    <page string="Mensaje de cuota vencida">
+                      <group>
+                        <group>
+                          <field name="cuota_vencida_activar"/>
+                          <field name="cuota_vencida_mensaje"
+                            placeholder="Hola {{1}}. Su cuota de monto {{2}}, vencio el {{3}}."
+                            attrs="{'invisible': [('cuota_vencida_activar', '=', False)], 'required': [('cuota_vencida_activar', '=', True)]}"/>
+                          <field name="cuota_vencida_dias_despues" attrs="{'invisible': [('cuota_vencida_activar', '=', False)], 'required': [('cuota_vencida_activar', '=', True)]}"/>
+                          <field name="cuota_vencida_activar_segundo_envio" attrs="{'invisible': [('cuota_vencida_activar', '=', False)]}"/>
+                          <field name="cuota_vencida_segundo_envio_dias_despues" attrs="{'invisible': ['|', ('cuota_vencida_activar', '=', False), ('cuota_vencida_activar_segundo_envio', '=', False)]}"/>
+                        </group>
+                        <group>
+                          <field name="cuota_vencida_var_1" readonly="1"/>
+                          <field name="cuota_vencida_var_2" readonly="1"/>
+                          <field name="cuota_vencida_var_3" readonly="1"/>
+                        </group>
+                      </group>
+                    </page>
+                    <page string="Mensaje notificacion deuda">
+                      <group>
+                        <group>
+                          <field name="notificacion_deuda_activar"/>
+                          <field name="notificacion_deuda_mensaje"
+                            placeholder="Hola {{1}}. Esta registrando una deuda de {{2}}, en {{3}} cuotas."
+                            attrs="{'invisible': [('notificacion_deuda_activar', '=', False)], 'required': [('notificacion_deuda_activar', '=', True)]}"/>
+                          <field name="notificacion_deuda_dia" attrs="{'invisible': [('notificacion_deuda_activar', '=', False)], 'required': [('notificacion_deuda_activar', '=', True)]}"/>
+                          <field name="notificacion_deuda_activar_segundo_envio" attrs="{'invisible': [('notificacion_deuda_activar', '=', False)]}"/>
+                          <field name="notificacion_deuda_dia_segundo_envio" attrs="{'invisible': ['|', ('notificacion_deuda_activar', '=', False), ('notificacion_deuda_activar_segundo_envio', '=', False)]}"/>
+                        </group>
+                        <group>
+                          <field name="notificacion_deuda_var_1" readonly="1"/>
+                          <field name="notificacion_deuda_var_2" readonly="1"/>
+                          <field name="notificacion_deuda_var_3" readonly="1"/>
+                        </group>
+                      </group>
+                    </page>
+                    <page string="Mensaje del codigo de Terminos y Condiciones">
+                      <group>
+                        <group>
+                          <field name="tc_codigo"/>
+                          <field name="tc_mensaje"
+                            placeholder="El codigo de activacion es {{1}}."
+                            attrs="{'invisible': [('tc_codigo', '=', False)], 'required': [('tc_codigo', '=', True)]}"/>
+                        </group>
+                        <group>
+                        </group>
+                      </group>
+                    </page>
+                  </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record model="ir.actions.act_window" id="financiera_sms_config_action">
+      <field name="name">Configuracion</field>
+      <field name="res_model">financiera.sms.config</field>
+      <field name="view_mode">tree,form</field>
+      <field name="view_id" ref="financiera_sms_conf_tree"/>
+    </record>
+
+    <!-- Top menu item -->
+
+    <menuitem name="SMS Notificaciones" id="menu_sms" 
+    web_icon="financiera_sms,static/description/icon.png" groups="financiera_sms.manager"/>
+    
+    <!-- menu categories -->
+    
+    <!-- <menuitem name="Configuracion" id="menu_config" sequence="100" parent="menu_sms"/> -->
+    <menuitem name="Configuracion" id="menu_config_action" parent="menu_sms"
+     action="financiera_sms_config_action" sequence="100"/>
+
+  </data>
+</openerp>
