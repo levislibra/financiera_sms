@@ -4,20 +4,36 @@ from openerp import models, fields, api
 from openerp.exceptions import UserError, ValidationError
 from datetime import datetime, timedelta
 from dateutil import relativedelta
+from random import randint
 import requests
+from lxml.html.clean import Cleaner
+import re
 
 class FinancieraSmsMessage(models.Model):
 	_name = 'financiera.sms.message'
 
 	_order = 'id desc'
+	name = fields.Char("Nombre")
 	partner_id = fields.Many2one('res.partner', 'Cliente')
+	prestamo_id = fields.Many2one('financiera.prestamo', 'Prestamo')
 	config_id = fields.Many2one('financiera.sms.config', 'Configuracion sms')
 	tipo = fields.Char('Tipo de mensaje')
 	to = fields.Char('Para')
 	body = fields.Text('Mensaje')
 	error_message = fields.Char("Mensaje de error")
 	status = fields.Char("Estado")
+	id_interno = fields.Char('Id interno')
+	html = fields.Text('Html')
 	company_id = fields.Many2one('res.company', 'Empresa')
+	respuesta_ids = fields.One2many('financiera.sms.message.response', 'sms_message_id', 'Respuestas')
+
+	@api.model
+	def create(self, values):
+		rec = super(FinancieraSmsMessage, self).create(values)
+		rec.update({
+			'name': 'SMS ' + str(rec.id).zfill(6),
+		})
+		return rec
 
 	@api.one
 	def send(self):
@@ -28,6 +44,10 @@ class FinancieraSmsMessage(models.Model):
 				'tos': self.to,
 				'texto': self.body,
 			}
+			if self.tipo == 'TC aceptacion':
+				params['idinterno'] = self.id_interno
+				params['texto'] = self.body + " http://1rck.in/-000000"
+				params['html'] = self.html
 			r = requests.get('http://servicio.smsmasivos.com.ar/enviar_sms.asp?api=1', params=params)
 			self.error_message = r.reason
 			if r.status_code == 200:
@@ -183,6 +203,80 @@ class FinancieraSmsMessage(models.Model):
 								message_id.send()
 				sms_configuracion_id.actualizar_saldo()
 
+class FinancieraSmsMessageResponse(models.Model):
+	_name = 'financiera.sms.message.response'
+
+	_order = 'id desc'
+	name = fields.Char("Nombre")
+	partner_id = fields.Many2one('res.partner', 'Cliente')
+	mobile = fields.Char('Movil')
+	text = fields.Text('Texto')
+	date = fields.Datetime('Fecha')
+	id_sms_masivos = fields.Integer('Id Sms Maviso')
+	id_interno = fields.Char('Id interno')
+	sms_message_id = fields.Many2one('financiera.sms.message', 'Respuesta al mensaje')
+	company_id = fields.Many2one('res.company', 'Empresa')
+
+	@api.model
+	def create(self, values):
+		rec = super(FinancieraSmsMessageResponse, self).create(values)
+		rec.update({
+			'name': 'RSP ' + str(rec.id).zfill(6),
+		})
+		return rec
+
+	@api.model
+	def _cron_read_response(self):
+		cr = self.env.cr
+		uid = self.env.uid
+		company_obj = self.pool.get('res.company')
+		comapny_ids = company_obj.search(cr, uid, [])
+		for _id in comapny_ids:
+			company_id = company_obj.browse(cr, uid, _id)
+			if len(company_id.sms_configuracion_id) > 0:
+				config_id = company_id.sms_configuracion_id
+				params = {
+					'usuario': config_id.usuario,
+					'clave': config_id.password,
+					'solonoleidos': 1,
+					'marcarcomoleidos': 1,
+					'traeridinterno': 1,
+				}
+				r = requests.get('http://servicio.smsmasivos.com.ar/obtener_sms_entrada.asp?', params=params)
+				if r.status_code == 200:
+					for responses in r.text.split('\n'):
+						value = responses.split('\t')
+						if len(value) >= 4:
+							partner_obj = self.pool.get('res.partner')
+							partner_ids = partner_obj.search(cr, uid, [
+								('mobile', '=', value[0])
+							])
+							partner_id = None
+							if len(partner_ids) > 0:
+								partner_id = partner_ids[0]
+							params = {
+								'partner_id': partner_id,
+								'mobile': value[0],
+								'text': value[1],
+								'date': value[2],
+								'id_sms_masivos': value[3],
+								'id_interno': value[4].replace('\r', ''),
+								'company_id': self.env.user.company_id.id,
+							}
+							response_id = self.env['financiera.sms.message.response'].create(params)
+							sms_obj = self.pool.get('financiera.sms.message')
+							sms_ids = sms_obj.search(cr, uid, [
+								('id_interno', '=', response_id.id_interno)
+							])
+							if len(sms_ids) > 0:
+								response_id.sms_message_id = sms_ids[0]
+								# Comprobar si la respuesta es correcta
+								sms_message_id = sms_obj.browse(cr, uid, sms_ids[0])
+								if len(sms_message_id.prestamo_id) > 0:
+									prestamo_id = sms_message_id.prestamo_id
+									respuesta_correcta = config_id.metodo_sms_tc_respuesta_correcta.replace('{{1}}', prestamo_id.email_tc_code)
+									if response_id.text == respuesta_correcta:
+										prestamo_id.sms_response_confirma_tc()
 
 class ExtendsMailMail(models.Model):
 	_name = 'mail.mail'
@@ -215,3 +309,100 @@ class ExtendsMailMail(models.Model):
 				sms_configuracion_id.actualizar_saldo()
 				prestamo_id.email_tc_code_sent = True
 
+class ExtendsResPartner(models.Model):
+	_name = 'res.partner'
+	_inherit = 'res.partner'
+
+	@api.one
+	def button_solicitar_codigo(self):
+		sms_configuracion_id = self.company_id.sms_configuracion_id
+		if sms_configuracion_id.validacion_celular_codigo:
+			sms_message_values = {
+				'partner_id': self.id,
+				'config_id': sms_configuracion_id.id,
+				'to': self.app_numero_celular,
+				'tipo': 'Codigo VC',
+				'company_id': self.company_id.id,
+			}
+			message_id = self.env['financiera.sms.message'].create(sms_message_values)
+			n = 4
+			range_start = 10**(n-1)
+			range_end = (10**n)-1
+			codigo = str(randint(range_start, range_end)).zfill(n)
+			self.app_codigo = codigo
+			message_id.set_message_code(sms_configuracion_id.validacion_celular_mensaje, codigo)
+			message_id.send()
+			sms_configuracion_id.actualizar_saldo()
+
+class ExtendsFinancieraPrestamo(models.Model):
+	_name = 'financiera.prestamo'
+	_inherit = 'financiera.prestamo'
+
+	sms_aceptacion_tc_id = fields.Many2one('financiera.sms.message', 'SMS aceptacion TC')
+
+	@api.one
+	def metodo_aceptacion_sms_enviar_tc(self):
+		sms_configuracion_id = self.company_id.sms_configuracion_id
+		if sms_configuracion_id.metodo_sms_tc_codigo:
+			reporte_html = self.report_render_html()
+			sms_message_values = {
+				'partner_id': self.partner_id.id,
+				'prestamo_id': self.id,
+				'config_id': sms_configuracion_id.id,
+				'to': self.partner_id.mobile,
+				'id_interno': str(self.id),
+				'tipo': 'TC aceptacion',
+				'html': reporte_html,
+				'company_id': self.company_id.id,
+			}
+			message_id = self.env['financiera.sms.message'].create(sms_message_values)
+			codigo = self.email_tc_code
+			message_id.set_message_code(sms_configuracion_id.metodo_sms_tc_mensaje, codigo)
+			message_id.send()
+			sms_configuracion_id.actualizar_saldo()
+			self.sms_aceptacion_tc_id = message_id.id
+	
+	@api.multi
+	def report_render_html(self, data=None):
+		report_name = self.company_id.sms_configuracion_id.metodo_sms_tc_nombre_reporte
+		report_obj = self.env['report']
+		report = report_obj._get_report_from_name(report_name)
+		docargs = {
+				'doc_ids': self._ids,
+				'doc_model': report.model,
+				'docs': self,
+		}
+		html = report_obj.render(report_name, docargs)
+		html = html.replace('\n', '')
+		print("Original: ", len(html))
+		# # Opcion 2
+		# html2 = self.sanitize(html)
+		# print("Opcion2: ", len(html2))
+		# Opcion 3
+		# html3 = html.replace("/<img[^>]*>/g", "")
+		html3 = re.sub("(<img.*?>)", "", html, 0, re.IGNORECASE | re.DOTALL | re.MULTILINE)
+		html3 = self.sanitize(html3)
+		print("Opcion3: ", len(html3))
+		return html3
+
+	def sanitize(self, dirty_html):
+		cleaner = Cleaner(
+			page_structure=True,
+			meta=True,
+			embedded=True,
+			links=True,
+			style=True,
+			processing_instructions=True,
+			# inline_style=True,
+			scripts=True,
+			javascript=True,
+			comments=True,
+			frames=True,
+			forms=True,
+			annoying_tags=True,
+			remove_unknown_tags=True,
+			safe_attrs_only=True,
+			safe_attrs=frozenset(['src','color', 'href', 'title', 'class', 'name', 'id']),
+			remove_tags=('span', 'font', 'div')
+		)
+		return cleaner.clean_html(dirty_html)

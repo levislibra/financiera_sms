@@ -76,6 +76,16 @@ class FinancieraSmsConfig(models.Model):
 	tc_codigo = fields.Boolean("Activar mensaje con codigo de terminos y condiciones.")
 	tc_mensaje = fields.Text('Mensaje', help='Usar {{1}} como codigo.')
 
+	# Validacion de celular para portal y App
+	validacion_celular_codigo = fields.Boolean("Activar mensaje de codigo para validacion de celular.")
+	validacion_celular_mensaje = fields.Text('Mensaje', help='Usar {{1}} como codigo.')
+
+	# TC por medio de sms
+	metodo_sms_tc_codigo = fields.Boolean("Activar mensaje de terminos y condiciones.")
+	metodo_sms_tc_mensaje = fields.Text('Mensaje', help='Usar {{1}} como codigo.')
+	metodo_sms_tc_nombre_reporte = fields.Char("Nombre reporte en pdf a adjuntar")
+	metodo_sms_tc_respuesta_correcta = fields.Text('Respuesta correcta', help='Usar {{1}} como codigo.')
+
 	@api.one
 	def actualizar_saldo(self):
 		r = requests.get('http://servicio.smsmasivos.com.ar/obtener_saldo.asp?', params={'usuario': self.usuario, 'clave': self.password})

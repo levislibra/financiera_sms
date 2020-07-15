@@ -104,6 +104,34 @@
                         <group>
                         </group>
                       </group>
+										</page>
+										<page string="Mensaje de codigo para validacion de celular">
+                      <group>
+                        <group>
+                          <field name="validacion_celular_codigo"/>
+                          <field name="validacion_celular_mensaje"
+                            placeholder="El codigo de activacion es {{1}}."
+                            attrs="{'invisible': [('validacion_celular_codigo', '=', False)], 'required': [('validacion_celular_codigo', '=', True)]}"/>
+                        </group>
+                        <group>
+                        </group>
+                      </group>
+										</page>
+										<page string="Mensaje de Terminos y Condiciones">
+                      <group>
+                        <group>
+                          <field name="metodo_sms_tc_codigo"/>
+                          <field name="metodo_sms_tc_mensaje"
+                            	placeholder="El codigo de activacion es {{1}}."
+															attrs="{'invisible': [('metodo_sms_tc_codigo', '=', False)], 'required': [('metodo_sms_tc_codigo', '=', True)]}"/>
+														<field name="metodo_sms_tc_nombre_reporte"
+															attrs="{'invisible': [('metodo_sms_tc_codigo', '=', False)], 'required': [('metodo_sms_tc_codigo', '=', True)]}"/>
+														<field name="metodo_sms_tc_respuesta_correcta"
+                            	attrs="{'invisible': [('metodo_sms_tc_codigo', '=', False)], 'required': [('metodo_sms_tc_codigo', '=', True)]}"/>
+                        </group>
+                        <group>
+                        </group>
+                      </group>
                     </page>
                   </notebook>
                 </sheet>

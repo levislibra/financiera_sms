@@ -8,10 +8,12 @@
       <field name="model">financiera.sms.message</field>
       <field name="arch" type="xml">
         <tree create='false' delete='false' edit='false'>
-          <field name="create_date" string="Fecha"/>
+					<field name="create_date" string="Fecha"/>
+					<field name="name"/>
           <field name="partner_id"/>
           <field name="to"/>
-          <field name="tipo"/>
+					<field name="tipo"/>
+					<field name="id_interno"/>
           <field name="error_message"/>
           <field name="status"/>
           <field name="company_id" groups="base.group_erp_manager"/>
@@ -42,7 +44,7 @@
       <field name="name">financiera.sms.message.form</field>
       <field name="model">financiera.sms.message</field>
       <field name="arch" type="xml">
-        <form string="Mensaje Whatsapp">
+        <form string="Mensaje SMS">
           <sheet>
             <group>
               <group>
@@ -54,10 +56,19 @@
                 <field name="body"/>
               </group>
               <group>
+								<field name="prestamo_id"/>
                 <field name="error_message"/>
                 <field name="status"/>
               </group>
-            </group>
+						</group>
+						<notebook>
+							<page name="response" string="Respuestas">
+								<field name="respuesta_ids"/>
+							</page>
+							<page name="html" string="HTML">
+								<field name="html" widget="html"/>
+							</page>
+						</notebook>
           </sheet>
         </form>
       </field>

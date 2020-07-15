@@ -28,6 +28,7 @@
         'security/security.xml',
         'views/sms_configuracion.xml',
         'views/sms_message.xml',
+				'views/sms_message_response.xml',
         'views/extends_res_company.xml',
         'data/ir_cron.xml',
     ],
