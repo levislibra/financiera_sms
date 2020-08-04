@@ -289,7 +289,7 @@ class ExtendsMailMail(models.Model):
 		sub_action = context.get('sub_action')
 		active_id = context.get('active_id')
 		super(ExtendsMailMail, self).send(auto_commit=False, raise_exception=False)
-		if active_model == 'financiera.prestamo' and 'tc_sent' in sub_action:
+		if active_model == 'financiera.prestamo' and sub_action and 'tc_sent' in sub_action:
 			cr = self.env.cr
 			uid = self.env.uid
 			prestamo_obj = self.pool.get('financiera.prestamo')
