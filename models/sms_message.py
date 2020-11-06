@@ -314,6 +314,7 @@ class ExtendsResPartner(models.Model):
 	_name = 'res.partner'
 	_inherit = 'res.partner'
 
+	# Documentada en Librasoft API
 	@api.one
 	def button_solicitar_codigo(self):
 		sms_configuracion_id = self.company_id.sms_configuracion_id
@@ -334,6 +335,7 @@ class ExtendsResPartner(models.Model):
 			message_id.set_message_code(sms_configuracion_id.validacion_celular_mensaje, codigo)
 			message_id.send()
 			sms_configuracion_id.actualizar_saldo()
+		return True
 
 class ExtendsFinancieraPrestamo(models.Model):
 	_name = 'financiera.prestamo'
