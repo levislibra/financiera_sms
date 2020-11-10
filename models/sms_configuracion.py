@@ -92,6 +92,7 @@ class FinancieraSmsConfig(models.Model):
 		if r.status_code != 200:
 			raise ValidationError("Error de conexion. Motivo: " + r.reason + ". Contacte con Librasoft.")
 		else:
+			print("r.content: ", r.content)
 			self.sms_saldo = int(r.content)
 
 	@api.one
