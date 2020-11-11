@@ -88,6 +88,7 @@ class FinancieraSmsConfig(models.Model):
 
 	@api.one
 	def send_sms_test(self):
+		print("send_sms_test ********************************")
 		params = {
 			'usuario': self.usuario,
 			'clave': self.password,
@@ -99,8 +100,13 @@ class FinancieraSmsConfig(models.Model):
 			raise ValidationError("Error de envio. Motivo: " + r.reason + ". Contacte con Librasoft.")
 
 	@api.one
-	def obtener_saldo(self):
-		r = requests.get('http://servicio.smsmasivos.com.ar/obtener_saldo.asp?', params={'usuario': self.usuario, 'clave': self.password})
+	def actualizar_saldo(self):
+		print("actualizar_saldo *****************************")
+		params = {
+			'usuario': self.usuario,
+			'clave': self.password,
+		}
+		r = requests.get('http://servicio.smsmasivos.com.ar/obtener_saldo.asp?', params=params)
 		if r.status_code == 200:
 			self.sms_saldo = int(r.content)
 		else:
