@@ -88,7 +88,6 @@ class FinancieraSmsConfig(models.Model):
 
 	@api.one
 	def send_sms_test(self):
-		print("send_sms_test ********************************")
 		params = {
 			'usuario': self.usuario,
 			'clave': self.password,
@@ -101,7 +100,6 @@ class FinancieraSmsConfig(models.Model):
 
 	@api.one
 	def actualizar_saldo(self):
-		print("actualizar_saldo *****************************")
 		params = {
 			'usuario': self.usuario,
 			'clave': self.password,

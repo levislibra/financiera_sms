@@ -334,7 +334,7 @@ class ExtendsResPartner(models.Model):
 			self.app_codigo = codigo
 			message_id.set_message_code(sms_configuracion_id.validacion_celular_mensaje, codigo)
 			message_id.send()
-			# sms_configuracion_id.actualizar_saldo()
+			sms_configuracion_id.actualizar_saldo()
 		return True
 
 class ExtendsFinancieraPrestamo(models.Model):
@@ -379,7 +379,6 @@ class ExtendsFinancieraPrestamo(models.Model):
 		html = html.replace('\n', '')
 		html3 = re.sub("(<img.*?>)", "", html, 0, re.IGNORECASE | re.DOTALL | re.MULTILINE)
 		html3 = self.sanitize(html3)
-		# print("Opcion3: ", len(html3))
 		return html3
 
 	def sanitize(self, dirty_html):
