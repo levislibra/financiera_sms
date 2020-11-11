@@ -99,15 +99,11 @@ class FinancieraSmsConfig(models.Model):
 			raise ValidationError("Error de envio. Motivo: " + r.reason + ". Contacte con Librasoft.")
 
 	@api.one
-	def actualizar_saldo(self):
+	def obtener_saldo(self):
 		r = requests.get('http://servicio.smsmasivos.com.ar/obtener_saldo.asp?', params={'usuario': self.usuario, 'clave': self.password})
 		if r.status_code == 200:
-			print("r: ", r)
-			print("r.content: ", r.content)
 			self.sms_saldo = int(r.content)
 		else:
-			print("r: ", r)
-			print("r.reason: ", r.reason)
 			raise ValidationError("Error de conexion. Motivo: " + r.reason + ". Contacte con Librasoft.")
 
 class ExtendsResCompany(models.Model):
