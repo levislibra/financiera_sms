@@ -20,7 +20,7 @@
         <field name="arch" type="xml">
             <form string="Configuracion" create="false" delete="false">
                 <header>
-                  <button name="obtener_saldo" string="Actualizar saldo" type="object"/>
+                  <button name="actualizar_saldo" string="Actualizar saldo" type="object"/>
                   <button name="send_sms_test" string="Enviar mensaje de prueba" type="object"/>
                 </header>
                 <sheet>
