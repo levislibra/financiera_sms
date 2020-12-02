@@ -95,12 +95,14 @@ class FinancieraSmsMessage(models.Model):
 
 	@api.model
 	def _cron_enviar_mensajes_sms(self):
+		print("_cron_enviar_mensajes_sms")
 		cr = self.env.cr
 		uid = self.env.uid
 		fecha_actual = datetime.now()
 		company_obj = self.pool.get('res.company')
-		comapny_ids = company_obj.search(cr, uid, [])
-		for _id in comapny_ids:
+		company_ids = company_obj.search(cr, uid, [])
+		print("company_ids: ", company_ids)
+		for _id in company_ids:
 			company_id = company_obj.browse(cr, uid, _id)
 			print("company_id: ", company_id.name)
 			print("company_id.sms_configuracion_id: ", company_id.sms_configuracion_id)
@@ -238,8 +240,8 @@ class FinancieraSmsMessageResponse(models.Model):
 		cr = self.env.cr
 		uid = self.env.uid
 		company_obj = self.pool.get('res.company')
-		comapny_ids = company_obj.search(cr, uid, [])
-		for _id in comapny_ids:
+		company_ids = company_obj.search(cr, uid, [])
+		for _id in company_ids:
 			company_id = company_obj.browse(cr, uid, _id)
 			if len(company_id.sms_configuracion_id) > 0:
 				config_id = company_id.sms_configuracion_id
