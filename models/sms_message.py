@@ -102,14 +102,19 @@ class FinancieraSmsMessage(models.Model):
 		comapny_ids = company_obj.search(cr, uid, [])
 		for _id in comapny_ids:
 			company_id = company_obj.browse(cr, uid, _id)
+			print("company_id: ", company_id.name)
+			print("company_id.sms_configuracion_id: ", company_id.sms_configuracion_id)
 			if len(company_id.sms_configuracion_id) > 0:
 				sms_configuracion_id = company_id.sms_configuracion_id
+				print("sms_configuracion_id.preventivo_activar: ", sms_configuracion_id.preventivo_activar)
 				# Mensajes preventivos
 				if sms_configuracion_id.preventivo_activar:
 					primer_fecha = fecha_actual + relativedelta.relativedelta(days=sms_configuracion_id.preventivo_dias_antes)
 					segunda_fecha = None
 					if sms_configuracion_id.preventivo_activar_segundo_envio:
 						segunda_fecha = fecha_actual + relativedelta.relativedelta(days=sms_configuracion_id.preventivo_segundo_envio_dias_antes)
+					print("primer_fecha: ", primer_fecha)
+					print("segunda_fecha: ", segunda_fecha)
 					cuota_obj = self.pool.get('financiera.prestamo.cuota')
 					cuota_ids = cuota_obj.search(cr, uid, [
 						('company_id', '=', company_id.id),
@@ -117,8 +122,10 @@ class FinancieraSmsMessage(models.Model):
 						'|', ('fecha_vencimiento', '=', primer_fecha),
 						('fecha_vencimiento', '=', segunda_fecha)
 						])
+					print("cuota_ids: ", cuota_ids)
 					for _id in cuota_ids:
 						cuota_id = cuota_obj.browse(cr, uid, _id)
+						print("cuota_id.saldo: ", cuota_id.saldo)
 						if cuota_id.saldo > 0:
 							# mensaje = sms_configuracion_id.replace_values(mensaje, 'preventivo', cuota_id, cuota_id.partner_id,\
 							# 	sms_configuracion_id.preventivo_var_1, sms_configuracion_id.preventivo_var_2, sms_configuracion_id.preventivo_var_3)
@@ -129,6 +136,7 @@ class FinancieraSmsMessage(models.Model):
 								'tipo': 'Preventivo',
 								'company_id': company_id.id,
 							}
+							print("sms_message_values: ", sms_message_values)
 							message_id = self.env['financiera.sms.message'].create(sms_message_values)
 							message_id.set_message(
 								sms_configuracion_id.preventivo_mensaje,
