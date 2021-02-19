@@ -1,0 +1,100 @@
+<openerp>
+  <data>
+
+    <!-- Financiera Whatsapp message -->
+
+    <record model="ir.ui.view" id="financiera_sms_message_masive_tree">
+      <field name="name">financiera.sms.message.masive.tree</field>
+      <field name="model">financiera.sms.message.masive</field>
+      <field name="arch" type="xml">
+        <tree delete='false' edit='false'>
+					<field name="create_date" string="Fecha"/>
+					<field name="name"/>
+          <field name="tipo"/>
+					<field name="body"/>
+					<field name="partner_ids" widget="many2many_tags"/>
+					<field name="state"/>
+          <field name="company_id" groups="base.group_erp_manager"/>
+        </tree>
+      </field>
+    </record>
+
+    <!-- <record model="ir.ui.view" id="financiera_sms_message_search">
+      <field name="name">financiera.sms.message.search</field>
+      <field name="model">financiera.sms.message</field>
+      <field name="arch" type="xml">
+        <search>
+          <filter string="Enviados" name="enviados" domain="[('status','=', 'Enviado')]"/>
+          <filter string="No enviados" name="no_enviados" domain="[('status','=', 'No enviado')]"/>
+          <separator/>
+          <field name="partner_id"/>
+          <field name="to"/>
+          <field name="tipo"/>
+          <field name="error_message"/>
+          <field name="status"/>
+          <field name="create_date" string="Fecha"/>
+          <field name="company_id" groups="base.group_erp_manager"/>
+        </search>
+      </field>
+    </record> -->
+
+    <record id="financiera_sms_message_masive_form" model="ir.ui.view">
+      <field name="name">financiera.sms.message.masive.form</field>
+      <field name="model">financiera.sms.message.masive</field>
+      <field name="arch" type="xml">
+        <form string="Mensaje SMS Masivo">
+					<header>
+						<button name="send_messages" string="Enviar mensajes" states="draft" class="oe_highlight" type="object"/>
+						<field name="state" widget="statusbar"/>
+					</header>
+          <sheet>
+            <group>
+              <group>
+                <field name="company_id" groups="base.group_erp_manager"/>
+								<field name="create_date" string="Fecha" readonly="1"/>
+								<label for="buttons" string=" "/>
+								<div>
+									<button name="partners_cuota_preventiva" string="Clientes con cuotas en preventivo" states="draft" class="oe_link" type="object"/>
+									<button name="partners_cuota_vencida" string="Clientes con cuotas vencidas" states="draft" class="oe_link" type="object"/>
+								</div>
+                <field name="partner_ids" widget="many2many_tags"/>
+								<field name="tipo"/>
+								<field name="body_count_available"/>
+								<field name="body"/>
+								<label for="links" string=" "/>
+								<span>Agregue link a Whatsapp: https://wa.me/+549{numero de contacto}?text=Hola</span>
+								<field name="is_html"/>
+								<field name="html" widget="html" attrs="{'invisible': [('is_html','=',False)]}"/>
+              </group>
+              <group></group>
+						</group>
+						<notebook>
+							<page name="mensajes" string="Mensajes">
+								<field name="message_ids"/>
+							</page>
+						</notebook>
+          </sheet>
+        </form>
+      </field>
+    </record>
+
+    <record model="ir.actions.act_window" id="financiera_sms_message_masive_action">
+      <field name="name">Mensajes Masivos</field>
+      <!-- <field name="context">{'search_default_enviados': 1}</field> -->
+      <field name="res_model">financiera.sms.message.masive</field>
+      <field name="view_mode">tree,form</field>
+      <field name="view_id" ref="financiera_sms_message_masive_tree"/>
+    </record>
+
+
+    <!-- menu categories -->
+
+    <!-- Desde Modulo SMS -->
+    <menuitem name="Mensajes masivos" id="menu_sms_message_masive_action" parent="menu_sms" 
+    	action="financiera_sms_message_masive_action" sequence="1"/>
+		<!-- Desde Modulo Cobranza y seguimiento -->
+		<menuitem name="Mensajes masivos" id="menu_cobranza_message_masive_action" parent="financiera_cobranza_mora.menu_cobranza" 
+    	action="financiera_sms_message_masive_action" sequence="25"/>
+    
+  </data>
+</openerp>

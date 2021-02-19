@@ -5,5 +5,8 @@ user_financiera_sms_config,financiera.sms.config,model_financiera_sms_config,fin
 manager_financiera_sms_message,financiera.sms.message,model_financiera_sms_message,financiera_sms.manager,1,1,1,0
 user_financiera_sms_message,financiera.sms.message,model_financiera_sms_message,financiera_sms.user,1,1,1,0
 
+manager_financiera_sms_message_masive,financiera.sms.message.masive,model_financiera_sms_message_masive,financiera_sms.manager,1,1,1,0
+user_financiera_sms_message_masive,financiera.sms.message.masive,model_financiera_sms_message_masive,financiera_sms.user,1,1,1,0
+
 manager_financiera_sms_message_response,financiera.sms.message.response,model_financiera_sms_message_response,financiera_sms.manager,1,1,1,0
 user_financiera_sms_message_response,financiera.sms.message.response,model_financiera_sms_message_response,financiera_sms.user,1,1,1,0

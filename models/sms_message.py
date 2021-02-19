@@ -16,6 +16,7 @@ class FinancieraSmsMessage(models.Model):
 	name = fields.Char("Nombre")
 	partner_id = fields.Many2one('res.partner', 'Cliente')
 	prestamo_id = fields.Many2one('financiera.prestamo', 'Prestamo')
+	sms_message_masive_id = fields.Many2one('financiera.sms.message.masive', 'Mensaje masivo')
 	config_id = fields.Many2one('financiera.sms.config', 'Configuracion sms')
 	tipo = fields.Char('Tipo de mensaje')
 	to = fields.Char('Para')
@@ -44,8 +45,9 @@ class FinancieraSmsMessage(models.Model):
 				'tos': self.to,
 				'texto': self.body,
 			}
-			if self.tipo == 'TC aceptacion':
-				params['idinterno'] = self.id_interno
+			if self.html:
+				if self.tipo == 'TC aceptacion':
+					params['idinterno'] = self.id_interno
 				params['texto'] = self.body + " http://1rck.in/-000000"
 				params['html'] = self.html
 			r = requests.get('http://servicio.smsmasivos.com.ar/enviar_sms.asp?api=1', params=params)

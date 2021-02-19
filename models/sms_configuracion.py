@@ -16,6 +16,7 @@ class FinancieraSmsConfig(models.Model):
 	sms_saldo = fields.Integer('SMS restantes')
 	sms_numero_test = fields.Char('Movil destino de prueba')
 	sms_texto_test = fields.Char('Mensaje de prueba', size=120)
+	sms_message_masive_count = fields.Integer("SMS masivo id", default=1)
 	company_id = fields.Many2one('res.company', 'Empresa')
 	# Mensajes
 	# Aviso preventivo
