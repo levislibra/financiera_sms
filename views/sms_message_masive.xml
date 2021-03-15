@@ -52,12 +52,6 @@
               <group>
                 <field name="company_id" groups="base.group_erp_manager"/>
 								<field name="create_date" string="Fecha" readonly="1"/>
-								<label for="buttons" string=" "/>
-								<div>
-									<button name="partners_cuota_preventiva" string="Clientes con cuotas en preventivo" states="draft" class="oe_link" type="object"/>
-									<button name="partners_cuota_vencida" string="Clientes con cuotas vencidas" states="draft" class="oe_link" type="object"/>
-									<button name="partners_deseleccionar" string="Eliminar seleccion" states="draft" class="oe_link" type="object"/>
-								</div>
                 <field name="partner_ids" widget="many2many_tags"/>
 								<field name="tipo"/>
 								<field name="body_count_available"/>
@@ -67,7 +61,18 @@
 								<field name="is_html"/>
 								<field name="html" widget="html" attrs="{'invisible': [('is_html','=',False)]}"/>
               </group>
-              <group></group>
+              <group>
+								<label for="buttons" string=" "/>
+								<div>
+									<button name="partners_cuota_preventiva" string="Clientes con cuotas en preventivo" states="draft" class="oe_link" type="object"/>
+									<button name="partners_cuota_vencida" string="Clientes con cuotas vencidas" states="draft" class="oe_link" type="object"/>
+									<button name="partners_deseleccionar" string="Eliminar seleccion" states="draft" class="oe_link" type="object"/>
+									<button name="partners_cuota_vencida_moraTemprana" string="Clientes con cuotas en mora Temprana" states="draft" class="oe_link" type="object"/>
+									<button name="partners_cuota_vencida_moraMedia" string="Clientes con cuotas en mora Media" states="draft" class="oe_link" type="object"/>
+									<button name="partners_cuota_vencida_moraTardia" string="Clientes con cuotas en mora Tardia" states="draft" class="oe_link" type="object"/>
+									<button name="partners_cuota_vencida_incobrable" string="Clientes con cuotas incobrable" states="draft" class="oe_link" type="object"/>
+								</div>
+							</group>
 						</group>
 						<notebook>
 							<page name="mensajes" string="Mensajes">
