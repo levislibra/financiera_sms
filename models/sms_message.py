@@ -106,20 +106,29 @@ class FinancieraSmsMessage(models.Model):
 			company_id = company_obj.browse(cr, uid, _id)
 			if len(company_id.sms_configuracion_id) > 0:
 				sms_configuracion_id = company_id.sms_configuracion_id
-				# print("sms_configuracion_id.preventivo_activar: ", sms_configuracion_id.preventivo_activar)
 				# Mensajes preventivos
 				if sms_configuracion_id.preventivo_activar:
-					primer_fecha = fecha_actual + relativedelta.relativedelta(days=sms_configuracion_id.preventivo_dias_antes)
-					segunda_fecha = None
-					if sms_configuracion_id.preventivo_activar_segundo_envio:
-						segunda_fecha = fecha_actual + relativedelta.relativedelta(days=sms_configuracion_id.preventivo_segundo_envio_dias_antes)
+					fechas_preventiva = []
+					if sms_configuracion_id.preventivo_dias_antes > 0:
+						fecha = fecha_actual + relativedelta.relativedelta(days=sms_configuracion_id.preventivo_dias_antes)
+						fechas_preventiva.append(fecha)
+					if sms_configuracion_id.preventivo_segundo_envio_dias_antes > 0:
+						fecha = fecha_actual + relativedelta.relativedelta(days=sms_configuracion_id.preventivo_segundo_envio_dias_antes)
+						fechas_preventiva.append(fecha)
+					if sms_configuracion_id.preventivo_tercer_envio_dias_antes > 0:
+						fecha = fecha_actual + relativedelta.relativedelta(days=sms_configuracion_id.preventivo_tercer_envio_dias_antes)
+						fechas_preventiva.append(fecha)
+					if sms_configuracion_id.preventivo_cuarto_envio_dias_antes > 0:
+						fecha = fecha_actual + relativedelta.relativedelta(days=sms_configuracion_id.preventivo_cuarto_envio_dias_antes)
+						fechas_preventiva.append(fecha)
 					cuota_obj = self.pool.get('financiera.prestamo.cuota')
 					cuota_ids = cuota_obj.search(cr, uid, [
 						('company_id', '=', company_id.id),
+						('prestamo_id.state', '=', 'acreditado'),
 						('state', '=', 'activa'),
-						'|', ('fecha_vencimiento', '=', primer_fecha),
-						('fecha_vencimiento', '=', segunda_fecha)
-						])
+						('fecha_vencimiento', 'in', fechas_preventiva)])
+					print("Fechas Preventiva:", fechas_preventiva)
+					print("Cuotas Preventiva: ", cuota_ids)
 					for _id in cuota_ids:
 						cuota_id = cuota_obj.browse(cr, uid, _id)
 						if cuota_id.saldo > 0:
@@ -140,19 +149,32 @@ class FinancieraSmsMessage(models.Model):
 								sms_configuracion_id.preventivo_var_2,
 								sms_configuracion_id.preventivo_var_3)
 							message_id.send()
-				# Mensaje cuota vencida
+				# Mensaje cuota vencida mora temprana
 				if sms_configuracion_id.cuota_vencida_activar:
-					primer_fecha = fecha_actual - relativedelta.relativedelta(days=sms_configuracion_id.cuota_vencida_dias_despues)
-					segunda_fecha = None
-					if sms_configuracion_id.cuota_vencida_activar_segundo_envio:
-						segunda_fecha = fecha_actual - relativedelta.relativedelta(days=sms_configuracion_id.cuota_vencida_segundo_envio_dias_despues)
+					fechas_cuota_vencida = []
+					if sms_configuracion_id.cuota_vencida_dias_despues > 0:
+						fecha = fecha_actual - relativedelta.relativedelta(days=sms_configuracion_id.cuota_vencida_dias_despues)
+						fechas_cuota_vencida.append(fecha)
+					if sms_configuracion_id.cuota_vencida_segundo_envio_dias_despues > 0:
+						fecha = fecha_actual - relativedelta.relativedelta(days=sms_configuracion_id.cuota_vencida_segundo_envio_dias_despues)
+						fechas_cuota_vencida.append(fecha)
+					if sms_configuracion_id.cuota_vencida_tercer_envio_dias_despues > 0:
+						fecha = fecha_actual - relativedelta.relativedelta(days=sms_configuracion_id.cuota_vencida_tercer_envio_dias_despues)
+						fechas_cuota_vencida.append(fecha)
+					if sms_configuracion_id.cuota_vencida_cuarto_envio_dias_despues > 0:
+						fecha = fecha_actual - relativedelta.relativedelta(days=sms_configuracion_id.cuota_vencida_cuarto_envio_dias_despues)
+						fechas_cuota_vencida.append(fecha)
+					if sms_configuracion_id.cuota_vencida_quinto_envio_dias_despues > 0:
+						fecha = fecha_actual - relativedelta.relativedelta(days=sms_configuracion_id.cuota_vencida_quinto_envio_dias_despues)
+						fechas_cuota_vencida.append(fecha)
 					cuota_obj = self.pool.get('financiera.prestamo.cuota')
 					cuota_ids = cuota_obj.search(cr, uid, [
 						('company_id', '=', company_id.id),
+						('prestamo_id.state', '=', 'acreditado'),
 						('state', '=', 'activa'),
-						'|', ('fecha_vencimiento', '=', primer_fecha),
-						('fecha_vencimiento', '=', segunda_fecha)
-						])
+						('fecha_vencimiento', 'in', fechas_cuota_vencida)])
+					print("Fechas Mora Temprana: ", fechas_cuota_vencida)
+					print("Cuotas Mora Temprana: ", cuota_ids)
 					for _id in cuota_ids:
 						cuota_id = cuota_obj.browse(cr, uid, _id)
 						if cuota_id.saldo > 0:
@@ -173,6 +195,52 @@ class FinancieraSmsMessage(models.Model):
 								sms_configuracion_id.cuota_vencida_var_2,
 								sms_configuracion_id.cuota_vencida_var_3)
 							message_id.send()
+				# Mensaje cuota vencida mora media
+				if sms_configuracion_id.cuota_vencida_mora_media_activar:
+					fechas_cuota_vencida_mora_media = []
+					if sms_configuracion_id.cuota_vencida_mora_media_dias_despues > 0:
+						fecha = fecha_actual - relativedelta.relativedelta(days=sms_configuracion_id.cuota_vencida_mora_media_dias_despues)
+						fechas_cuota_vencida_mora_media.append(fecha)
+					if sms_configuracion_id.cuota_vencida_mora_media_segundo_envio_dias_despues > 0:
+						fecha = fecha_actual - relativedelta.relativedelta(days=sms_configuracion_id.cuota_vencida_mora_media_segundo_envio_dias_despues)
+						fechas_cuota_vencida_mora_media.append(fecha)
+					if sms_configuracion_id.cuota_vencida_mora_media_tercer_envio_dias_despues > 0:
+						fecha = fecha_actual - relativedelta.relativedelta(days=sms_configuracion_id.cuota_vencida_mora_media_tercer_envio_dias_despues)
+						fechas_cuota_vencida_mora_media.append(fecha)
+					if sms_configuracion_id.cuota_vencida_mora_media_cuarto_envio_dias_despues > 0:
+						fecha = fecha_actual - relativedelta.relativedelta(days=sms_configuracion_id.cuota_vencida_mora_media_cuarto_envio_dias_despues)
+						fechas_cuota_vencida_mora_media.append(fecha)
+					if sms_configuracion_id.cuota_vencida_mora_media_quinto_envio_dias_despues > 0:
+						fecha = fecha_actual - relativedelta.relativedelta(days=sms_configuracion_id.cuota_vencida_mora_media_quinto_envio_dias_despues)
+						fechas_cuota_vencida_mora_media.append(fecha)
+					cuota_obj = self.pool.get('financiera.prestamo.cuota')
+					cuota_ids = cuota_obj.search(cr, uid, [
+						('company_id', '=', company_id.id),
+						('prestamo_id.state', '=', 'acreditado'),
+						('state', '=', 'activa'),
+						('fecha_vencimiento', 'in', fechas_cuota_vencida_mora_media)])
+					print("Fechas Mora Media: ", fechas_cuota_vencida_mora_media)
+					print("Cuotas Mora Media: ", cuota_ids)
+					for _id in cuota_ids:
+						cuota_id = cuota_obj.browse(cr, uid, _id)
+						if cuota_id.saldo > 0:
+							sms_message_values = {
+								'partner_id': cuota_id.partner_id.id,
+								'config_id': sms_configuracion_id.id,
+								'to': cuota_id.partner_id.mobile or False,
+								'tipo': 'Cuota vencida',
+								'company_id': company_id.id,
+							}
+							message_id = self.env['financiera.sms.message'].create(sms_message_values)
+							message_id.set_message(
+								sms_configuracion_id.cuota_vencida_mora_media_mensaje,
+								'cuota_vencida',
+								cuota_id,
+								cuota_id.partner_id,
+								sms_configuracion_id.cuota_vencida_mora_media_var_1,
+								sms_configuracion_id.cuota_vencida_mora_media_var_2,
+								sms_configuracion_id.cuota_vencida_mora_media_var_3)
+							message_id.send()
 				# Mensaje notificacion deuda
 				if sms_configuracion_id.notificacion_deuda_activar:
 					if fecha_actual.day == sms_configuracion_id.notificacion_deuda_dia\
@@ -180,6 +248,7 @@ class FinancieraSmsMessage(models.Model):
 						partner_obj = self.pool.get('res.partner')
 						partner_ids = partner_obj.search(cr, uid, [
 							('company_id', '=', company_id.id),
+							('prestamo_id.state', '=', 'acreditado'),
 							('cuota_ids.fecha_vencimiento', '<', fecha_actual),
 							('cuota_ids.state', '=', 'activa')])
 						for _id in partner_ids:

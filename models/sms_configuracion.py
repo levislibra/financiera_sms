@@ -22,9 +22,11 @@ class FinancieraSmsConfig(models.Model):
 	# Aviso preventivo
 	preventivo_activar = fields.Boolean("Activar mensaje preventivo")
 	preventivo_mensaje = fields.Text('Mensaje')
-	preventivo_dias_antes = fields.Integer("Dias antes del vencimiento")
-	preventivo_activar_segundo_envio = fields.Boolean("Activar segundo envio")
-	preventivo_segundo_envio_dias_antes = fields.Integer("Dias antes del vencimiento")
+	preventivo_dias_antes = fields.Integer("Dias antes del vencimiento", help="Cero o negativo no se envia.")
+	preventivo_activar_segundo_envio = fields.Boolean("Activar segundo envio")#Depreciado
+	preventivo_segundo_envio_dias_antes = fields.Integer("Dias antes del vencimiento", help="Cero o negativo no se envia.")
+	preventivo_tercer_envio_dias_antes = fields.Integer("Dias antes del vencimiento", help="Cero o negativo no se envia.")
+	preventivo_cuarto_envio_dias_antes = fields.Integer("Dias antes del vencimiento", help="Cero o negativo no se envia.")
 	preventivo_var_1 = fields.Selection([('nombre_cliente', 'Nombre de cliente')],
 		'{{1}}', default='nombre_cliente',
 		help="Al usar {{1}}, sera reemplazado por este valor")
@@ -39,9 +41,12 @@ class FinancieraSmsConfig(models.Model):
 	# Aviso cuota vencida
 	cuota_vencida_activar = fields.Boolean("Activar mensaje de cuota vencida")
 	cuota_vencida_mensaje = fields.Text('Mensaje')
-	cuota_vencida_dias_despues = fields.Integer("Dias despues del vencimiento")
-	cuota_vencida_activar_segundo_envio = fields.Boolean("Activar segundo envio")
-	cuota_vencida_segundo_envio_dias_despues = fields.Integer("Dias despues del vencimiento")
+	cuota_vencida_dias_despues = fields.Integer("Dias despues del vencimiento", help="Cero o negativo no se envia.")
+	cuota_vencida_activar_segundo_envio = fields.Boolean("Activar segundo envio")# Depreciado
+	cuota_vencida_segundo_envio_dias_despues = fields.Integer("Dias despues del vencimiento", help="Cero o negativo no se envia.")
+	cuota_vencida_tercer_envio_dias_despues = fields.Integer("Dias despues del vencimiento", help="Cero o negativo no se envia.")
+	cuota_vencida_cuarto_envio_dias_despues = fields.Integer("Dias despues del vencimiento", help="Cero o negativo no se envia.")
+	cuota_vencida_quinto_envio_dias_despues = fields.Integer("Dias despues del vencimiento", help="Cero o negativo no se envia.")
 	cuota_vencida_var_1 = fields.Selection([
 		('nombre_cliente', 'Nombre de cliente')],
 		'{{1}}', default='nombre_cliente',
@@ -51,6 +56,27 @@ class FinancieraSmsConfig(models.Model):
 		'{{2}}', default='monto_cuota',
 		help="Al usar {{2}}, sera reemplazado por este valor")
 	cuota_vencida_var_3 = fields.Selection([
+		('fecha_vencimiento', 'Fecha de vencimiento')],
+		'{{3}}', default='fecha_vencimiento',
+		help="Al usar {{3}}, sera reemplazado por este valor")
+	# Aviso cuota vencida mora media
+	cuota_vencida_mora_media_activar = fields.Boolean("Activar mensaje de cuota vencida")
+	cuota_vencida_mora_media_mensaje = fields.Text('Mensaje')
+	cuota_vencida_mora_media_dias_despues = fields.Integer("Dias despues del vencimiento", help="Cero o negativo no se envia.")
+	cuota_vencida_mora_media_activar_segundo_envio = fields.Boolean("Activar segundo envio")# Depreciado
+	cuota_vencida_mora_media_segundo_envio_dias_despues = fields.Integer("Dias despues del vencimiento", help="Cero o negativo no se envia.")
+	cuota_vencida_mora_media_tercer_envio_dias_despues = fields.Integer("Dias despues del vencimiento", help="Cero o negativo no se envia.")
+	cuota_vencida_mora_media_cuarto_envio_dias_despues = fields.Integer("Dias despues del vencimiento", help="Cero o negativo no se envia.")
+	cuota_vencida_mora_media_quinto_envio_dias_despues = fields.Integer("Dias despues del vencimiento", help="Cero o negativo no se envia.")
+	cuota_vencida_mora_media_var_1 = fields.Selection([
+		('nombre_cliente', 'Nombre de cliente')],
+		'{{1}}', default='nombre_cliente',
+		help="Al usar {{1}}, sera reemplazado por este valor")
+	cuota_vencida_mora_media_var_2 = fields.Selection([
+		('monto_cuota', 'Monto de la cuota')],
+		'{{2}}', default='monto_cuota',
+		help="Al usar {{2}}, sera reemplazado por este valor")
+	cuota_vencida_mora_media_var_3 = fields.Selection([
 		('fecha_vencimiento', 'Fecha de vencimiento')],
 		'{{3}}', default='fecha_vencimiento',
 		help="Al usar {{3}}, sera reemplazado por este valor")

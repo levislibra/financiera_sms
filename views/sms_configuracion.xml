@@ -39,39 +39,45 @@
                     </group>
                   </group>
                   <notebook>
-                    <page string="Mensaje preventivo">
-                      <group>
-                        <group>
-                          <field name="preventivo_activar"/>
-                          <field name="preventivo_mensaje"
-                            placeholder="Hola {{1}}. Su cuota de monto {{2}}, vence el {{3}}."
-                            attrs="{'invisible': [('preventivo_activar', '=', False)], 'required': [('preventivo_activar', '=', True)]}"/>
-                          <field name="preventivo_dias_antes" attrs="{'invisible': [('preventivo_activar', '=', False)], 'required': [('preventivo_activar', '=', True)]}"/>
-                          <field name="preventivo_activar_segundo_envio" attrs="{'invisible': [('preventivo_activar', '=', False)]}"/>
-                          <field name="preventivo_segundo_envio_dias_antes" attrs="{'invisible': ['|', ('preventivo_activar', '=', False), ('preventivo_activar_segundo_envio', '=', False)]}"/>
+                    <page string="SMS vencimiento de cuota">
+                      <group col="3">
+                        <group string="SMS preventivo" style="background-color:gainsboro;padding:5px;border-radius: 16px;">
+													<field name="preventivo_activar"/>
+                          <field name="preventivo_mensaje" placeholder="Hola {{1}}. Su cuota de monto {{2}}, vence el {{3}}."
+													attrs="{'invisible': [('preventivo_activar', '=', False)], 'required': [('preventivo_activar', '=', True)]}"/>
+													<field name="preventivo_var_1" readonly="1"/>
+													<field name="preventivo_var_2" readonly="1"/>
+													<field name="preventivo_var_3" readonly="1"/>
+                          <field name="preventivo_dias_antes" attrs="{'invisible': [('preventivo_activar', '=', False)]}"/>
+                          <field name="preventivo_segundo_envio_dias_antes" attrs="{'invisible': [('preventivo_activar', '=', False)]}"/>
+													<field name="preventivo_tercer_envio_dias_antes" attrs="{'invisible': [('preventivo_activar', '=', False)]}"/>
+													<field name="preventivo_cuarto_envio_dias_antes" attrs="{'invisible': [('preventivo_activar', '=', False)]}"/>
                         </group>
-                        <group>
-                          <field name="preventivo_var_1" readonly="1"/>
-                          <field name="preventivo_var_2" readonly="1"/>
-                          <field name="preventivo_var_3" readonly="1"/>
-                        </group>
-                      </group>
-                    </page>
-                    <page string="Mensaje de cuota vencida">
-                      <group>
-                        <group>
+												<group string="SMS mora temprana" style="background-color:gainsboro;padding:4px;border-radius: 10px;">
                           <field name="cuota_vencida_activar"/>
-                          <field name="cuota_vencida_mensaje"
-                            placeholder="Hola {{1}}. Su cuota de monto {{2}}, vencio el {{3}}."
-                            attrs="{'invisible': [('cuota_vencida_activar', '=', False)], 'required': [('cuota_vencida_activar', '=', True)]}"/>
-                          <field name="cuota_vencida_dias_despues" attrs="{'invisible': [('cuota_vencida_activar', '=', False)], 'required': [('cuota_vencida_activar', '=', True)]}"/>
-                          <field name="cuota_vencida_activar_segundo_envio" attrs="{'invisible': [('cuota_vencida_activar', '=', False)]}"/>
-                          <field name="cuota_vencida_segundo_envio_dias_despues" attrs="{'invisible': ['|', ('cuota_vencida_activar', '=', False), ('cuota_vencida_activar_segundo_envio', '=', False)]}"/>
+                          <field name="cuota_vencida_mensaje" placeholder="Hola {{1}}. Su cuota de monto {{2}}, vencio el {{3}}."
+                          attrs="{'invisible': [('cuota_vencida_activar', '=', False)], 'required': [('cuota_vencida_activar', '=', True)]}"/>
+													<field name="cuota_vencida_var_1" readonly="1"/>
+													<field name="cuota_vencida_var_2" readonly="1"/>
+													<field name="cuota_vencida_var_3" readonly="1"/>	
+													<field name="cuota_vencida_dias_despues" attrs="{'invisible': [('cuota_vencida_activar', '=', False)], 'required': [('cuota_vencida_activar', '=', True)]}"/>
+                          <field name="cuota_vencida_segundo_envio_dias_despues" attrs="{'invisible': [('cuota_vencida_activar', '=', False)]}"/>
+													<field name="cuota_vencida_tercer_envio_dias_despues" attrs="{'invisible': [('cuota_vencida_activar', '=', False)]}"/>
+													<field name="cuota_vencida_cuarto_envio_dias_despues" attrs="{'invisible': [('cuota_vencida_activar', '=', False)]}"/>
+													<field name="cuota_vencida_quinto_envio_dias_despues" attrs="{'invisible': [('cuota_vencida_activar', '=', False)]}"/>
                         </group>
-                        <group>
-                          <field name="cuota_vencida_var_1" readonly="1"/>
-                          <field name="cuota_vencida_var_2" readonly="1"/>
-                          <field name="cuota_vencida_var_3" readonly="1"/>
+												<group string="SMS mora media" style="background-color:gainsboro;padding:2px;border-radius: 6px;">
+                          <field name="cuota_vencida_mora_media_activar"/>
+                          <field name="cuota_vencida_mora_media_mensaje" placeholder="SU CUOTA VENCIO DE {{2}}, VENCIO EL {{3}}."
+                          attrs="{'invisible': [('cuota_vencida_mora_media_activar', '=', False)], 'required': [('cuota_vencida_mora_media_activar', '=', True)]}"/>
+													<field name="cuota_vencida_mora_media_var_1" readonly="1"/>
+													<field name="cuota_vencida_mora_media_var_2" readonly="1"/>
+													<field name="cuota_vencida_mora_media_var_3" readonly="1"/>	
+													<field name="cuota_vencida_mora_media_dias_despues" attrs="{'invisible': [('cuota_vencida_mora_media_activar', '=', False)]}"/>
+                          <field name="cuota_vencida_mora_media_segundo_envio_dias_despues" attrs="{'invisible': [('cuota_vencida_mora_media_activar', '=', False)]}"/>
+													<field name="cuota_vencida_mora_media_tercer_envio_dias_despues" attrs="{'invisible': [('cuota_vencida_mora_media_activar', '=', False)]}"/>
+													<field name="cuota_vencida_mora_media_cuarto_envio_dias_despues" attrs="{'invisible': [('cuota_vencida_mora_media_activar', '=', False)]}"/>
+													<field name="cuota_vencida_mora_media_quinto_envio_dias_despues" attrs="{'invisible': [('cuota_vencida_mora_media_activar', '=', False)]}"/>
                         </group>
                       </group>
                     </page>
