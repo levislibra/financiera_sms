@@ -1,13 +1,10 @@
 # -*- coding: utf-8 -*-
 
 from openerp import models, fields, api
-from openerp.exceptions import UserError, ValidationError
-from datetime import datetime, timedelta
+from datetime import datetime
 from dateutil import relativedelta
-from random import randint
 import requests
-from lxml.html.clean import Cleaner
-import re
+
 
 class FinancieraSmsMessage(models.Model):
 	_name = 'financiera.sms.message'
@@ -127,8 +124,6 @@ class FinancieraSmsMessage(models.Model):
 						('prestamo_id.state', '=', 'acreditado'),
 						('state', '=', 'activa'),
 						('fecha_vencimiento', 'in', fechas_preventiva)])
-					print("Fechas Preventiva:", fechas_preventiva)
-					print("Cuotas Preventiva: ", cuota_ids)
 					for _id in cuota_ids:
 						cuota_id = cuota_obj.browse(cr, uid, _id)
 						if cuota_id.saldo > 0:
@@ -173,8 +168,6 @@ class FinancieraSmsMessage(models.Model):
 						('prestamo_id.state', '=', 'acreditado'),
 						('state', '=', 'activa'),
 						('fecha_vencimiento', 'in', fechas_cuota_vencida)])
-					print("Fechas Mora Temprana: ", fechas_cuota_vencida)
-					print("Cuotas Mora Temprana: ", cuota_ids)
 					for _id in cuota_ids:
 						cuota_id = cuota_obj.browse(cr, uid, _id)
 						if cuota_id.saldo > 0:
@@ -219,8 +212,6 @@ class FinancieraSmsMessage(models.Model):
 						('prestamo_id.state', '=', 'acreditado'),
 						('state', '=', 'activa'),
 						('fecha_vencimiento', 'in', fechas_cuota_vencida_mora_media)])
-					print("Fechas Mora Media: ", fechas_cuota_vencida_mora_media)
-					print("Cuotas Mora Media: ", cuota_ids)
 					for _id in cuota_ids:
 						cuota_id = cuota_obj.browse(cr, uid, _id)
 						if cuota_id.saldo > 0:
@@ -272,203 +263,3 @@ class FinancieraSmsMessage(models.Model):
 									sms_configuracion_id.notificacion_deuda_var_3)
 								message_id.send()
 				sms_configuracion_id.actualizar_saldo()
-
-class FinancieraSmsMessageResponse(models.Model):
-	_name = 'financiera.sms.message.response'
-
-	_order = 'id desc'
-	name = fields.Char("Nombre")
-	partner_id = fields.Many2one('res.partner', 'Cliente')
-	mobile = fields.Char('Movil')
-	text = fields.Text('Texto')
-	date = fields.Datetime('Fecha')
-	id_sms_masivos = fields.Integer('Id Sms Maviso')
-	id_interno = fields.Char('Id interno')
-	sms_message_id = fields.Many2one('financiera.sms.message', 'Respuesta al mensaje')
-	company_id = fields.Many2one('res.company', 'Empresa')
-
-	@api.model
-	def create(self, values):
-		rec = super(FinancieraSmsMessageResponse, self).create(values)
-		rec.update({
-			'name': 'RSP ' + str(rec.id).zfill(6),
-		})
-		return rec
-
-	@api.model
-	def _cron_read_response(self):
-		cr = self.env.cr
-		uid = self.env.uid
-		company_obj = self.pool.get('res.company')
-		company_ids = company_obj.search(cr, uid, [])
-		for _id in company_ids:
-			company_id = company_obj.browse(cr, uid, _id)
-			if len(company_id.sms_configuracion_id) > 0:
-				config_id = company_id.sms_configuracion_id
-				params = {
-					'usuario': config_id.usuario,
-					'clave': config_id.password,
-					'solonoleidos': 1,
-					'marcarcomoleidos': 1,
-					'traeridinterno': 1,
-				}
-				r = requests.get('http://servicio.smsmasivos.com.ar/obtener_sms_entrada.asp?', params=params)
-				if r.status_code == 200:
-					for responses in r.text.split('\n'):
-						value = responses.split('\t')
-						if len(value) >= 4:
-							partner_obj = self.pool.get('res.partner')
-							partner_ids = partner_obj.search(cr, uid, [
-								('mobile', '=', value[0])
-							])
-							partner_id = None
-							if len(partner_ids) > 0:
-								partner_id = partner_ids[0]
-							params = {
-								'partner_id': partner_id,
-								'mobile': value[0],
-								'text': value[1],
-								'date': value[2],
-								'id_sms_masivos': value[3],
-								'id_interno': value[4].replace('\r', ''),
-								'company_id': self.env.user.company_id.id,
-							}
-							response_id = self.env['financiera.sms.message.response'].create(params)
-							sms_obj = self.pool.get('financiera.sms.message')
-							sms_ids = sms_obj.search(cr, uid, [
-								('id_interno', '=', response_id.id_interno)
-							])
-							if len(sms_ids) > 0:
-								response_id.sms_message_id = sms_ids[0]
-								# Comprobar si la respuesta es correcta
-								sms_message_id = sms_obj.browse(cr, uid, sms_ids[0])
-								if len(sms_message_id.prestamo_id) > 0:
-									prestamo_id = sms_message_id.prestamo_id
-									respuesta_correcta = config_id.metodo_sms_tc_respuesta_correcta.replace('{{1}}', prestamo_id.email_tc_code)
-									if response_id.text == respuesta_correcta:
-										prestamo_id.sms_response_confirma_tc()
-
-class ExtendsMailMail(models.Model):
-	_name = 'mail.mail'
-	_inherit = 'mail.mail'
-
-	@api.one
-	def send(self, auto_commit=False, raise_exception=False):
-		context = dict(self._context or {})
-		active_model = context.get('active_model')
-		sub_action = context.get('sub_action')
-		active_id = context.get('active_id')
-		super(ExtendsMailMail, self).send(auto_commit=False, raise_exception=False)
-		if active_model == 'financiera.prestamo' and sub_action and 'tc_sent' in sub_action:
-			cr = self.env.cr
-			uid = self.env.uid
-			prestamo_obj = self.pool.get('financiera.prestamo')
-			prestamo_id = prestamo_obj.browse(cr, uid, active_id)
-			if sub_action == 'tc_sent':
-				sms_configuracion_id = prestamo_id.company_id.sms_configuracion_id
-				if sms_configuracion_id.tc_codigo and prestamo_id.partner_id in self.recipient_ids:
-					sms_message_values = {
-						'partner_id': prestamo_id.partner_id.id,
-						'config_id': sms_configuracion_id.id,
-						'to': prestamo_id.partner_id.mobile,
-						'tipo': 'Codigo TC',
-						'company_id': prestamo_id.company_id.id,
-					}
-					message_id = self.env['financiera.sms.message'].create(sms_message_values)
-					message_id.set_message_code(sms_configuracion_id.tc_mensaje, prestamo_id.email_tc_code)
-					message_id.send()
-					sms_configuracion_id.actualizar_saldo()
-					prestamo_id.email_tc_code_sent = True
-
-class ExtendsResPartner(models.Model):
-	_name = 'res.partner'
-	_inherit = 'res.partner'
-
-	# Documentada en Librasoft API
-	@api.one
-	def button_solicitar_codigo(self):
-		sms_configuracion_id = self.company_id.sms_configuracion_id
-		if sms_configuracion_id.validacion_celular_codigo:
-			sms_message_values = {
-				'partner_id': self.id,
-				'config_id': sms_configuracion_id.id,
-				'to': self.app_numero_celular,
-				'tipo': 'Codigo VC',
-				'company_id': self.company_id.id,
-			}
-			message_id = self.env['financiera.sms.message'].create(sms_message_values)
-			n = 4
-			range_start = 10**(n-1)
-			range_end = (10**n)-1
-			codigo = str(randint(range_start, range_end)).zfill(n)
-			self.app_codigo = codigo
-			message_id.set_message_code(sms_configuracion_id.validacion_celular_mensaje, codigo)
-			message_id.send()
-			sms_configuracion_id.actualizar_saldo()
-		return True
-
-class ExtendsFinancieraPrestamo(models.Model):
-	_name = 'financiera.prestamo'
-	_inherit = 'financiera.prestamo'
-
-	sms_aceptacion_tc_id = fields.Many2one('financiera.sms.message', 'SMS aceptacion TC')
-
-	@api.one
-	def metodo_aceptacion_sms_enviar_tc(self):
-		sms_configuracion_id = self.company_id.sms_configuracion_id
-		if sms_configuracion_id.metodo_sms_tc_codigo:
-			reporte_html = self.report_render_html()
-			sms_message_values = {
-				'partner_id': self.partner_id.id,
-				'prestamo_id': self.id,
-				'config_id': sms_configuracion_id.id,
-				'to': self.partner_id.mobile,
-				'id_interno': str(self.id),
-				'tipo': 'TC aceptacion',
-				'html': reporte_html,
-				'company_id': self.company_id.id,
-			}
-			message_id = self.env['financiera.sms.message'].create(sms_message_values)
-			codigo = self.email_tc_code
-			message_id.set_message_code(sms_configuracion_id.metodo_sms_tc_mensaje, codigo)
-			message_id.send()
-			sms_configuracion_id.actualizar_saldo()
-			self.sms_aceptacion_tc_id = message_id.id
-	
-	@api.multi
-	def report_render_html(self, data=None):
-		report_name = self.company_id.sms_configuracion_id.metodo_sms_tc_nombre_reporte
-		report_obj = self.env['report']
-		report = report_obj._get_report_from_name(report_name)
-		docargs = {
-				'doc_ids': self._ids,
-				'doc_model': report.model,
-				'docs': self,
-		}
-		html = report_obj.render(report_name, docargs)
-		html = html.replace('\n', '')
-		html3 = re.sub("(<img.*?>)", "", html, 0, re.IGNORECASE | re.DOTALL | re.MULTILINE)
-		html3 = self.sanitize(html3)
-		return html3
-
-	def sanitize(self, dirty_html):
-		cleaner = Cleaner(
-			page_structure=True,
-			meta=True,
-			embedded=True,
-			links=True,
-			style=True,
-			processing_instructions=True,
-			# inline_style=True,
-			scripts=True,
-			javascript=True,
-			comments=True,
-			frames=True,
-			forms=True,
-			annoying_tags=True,
-			remove_unknown_tags=True,
-			safe_attrs_only=True,
-			safe_attrs=frozenset(['src','color', 'href', 'title', 'class', 'name', 'id']),
-			remove_tags=('span', 'font', 'div')
-		)
-		return cleaner.clean_html(dirty_html)

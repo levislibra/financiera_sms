@@ -9,6 +9,7 @@ import requests
 
 class FinancieraSmsConfig(models.Model):
 	_name = 'financiera.sms.config'
+	_inherit = ['mail.thread', 'ir.needaction_mixin']
 
 	name = fields.Char('Nombre')
 	usuario = fields.Char('Usuario')
@@ -17,6 +18,9 @@ class FinancieraSmsConfig(models.Model):
 	sms_numero_test = fields.Char('Movil destino de prueba')
 	sms_texto_test = fields.Char('Mensaje de prueba', size=120)
 	sms_message_masive_count = fields.Integer("SMS masivo id", default=1)
+	sms_alert_email = fields.Boolean("Activar alerta de saldo por email")
+	sms_responsable_user_id = fields.Many2one('res.users', 'Usuario responsable', help='Se enviara email cuando el saldo de sms sea bajo.')
+	sms_ir_mail_server_id = fields.Many2one('ir.mail_server', 'Servidor saliente')
 	company_id = fields.Many2one('res.company', 'Empresa')
 	# Mensajes
 	# Aviso preventivo
@@ -134,10 +138,36 @@ class FinancieraSmsConfig(models.Model):
 		r = requests.get('http://servicio.smsmasivos.com.ar/obtener_saldo.asp?', params=params)
 		if r.status_code == 200:
 			self.sms_saldo = int(r.content)
+			if self.sms_alert_email and (self.sms_saldo in [500, 200, 100, 50, 20, 10, 5, 0]):
+				self.send_mail_sms_balance_low()
 		else:
 			raise ValidationError("Error de conexion. Motivo: " + r.reason + ". Contacte con Librasoft.")
 
-class ExtendsResCompany(models.Model):
-	_inherit = 'res.company'
 
-	sms_configuracion_id = fields.Many2one('financiera.sms.config', 'Configuracion sobre mensajes SMS')
+	@api.one
+	def send_mail_sms_balance_low(self):
+		company_id = self.company_id
+		subject = "Saldo de SMS en %s"%company_id.name
+		message = """<h2>Hola!</h2>
+		<p>Su saldo de SMS es de %s.<p/>
+		<p>Recuerde contratar un nuevo plan lo mas pronto posible.</p>
+		<br/><br/><br/>"""%str(self.sms_saldo)
+		if self.sms_ir_mail_server_id and self.sms_responsable_user_id:
+			partner_ids= [(4, self.sms_responsable_user_id.partner_id.id)]
+			mail_server_id = self.sms_ir_mail_server_id
+			# In partner_ids, "4" adds the ID to the list 
+			# of followers and next number is the partner ID
+			if len(partner_ids) > 0:
+				post_vars = {
+					'mail_server_id': mail_server_id.id,
+					'email_from': '"'+company_id.name+'"' + '<'+company_id.email+'>',
+					'reply_to': company_id.email,
+					'subject': subject, 
+					'body': message, 
+					'partner_ids': partner_ids,
+					# 'auto_delete': False,
+				}
+				self.message_post(
+					message_type= "email",
+					subtype="mt_comment",
+					**post_vars)

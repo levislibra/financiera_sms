@@ -36,6 +36,10 @@
                     <group string="Prueba de conexión">
                       <field name="sms_numero_test"/>
                       <field name="sms_texto_test"/>
+											<separate string="Alerta saldo" colspan="2"/>
+											<field name="sms_alert_email"/>
+											<field name="sms_responsable_user_id" domain="[('company_id','=', company_id),('share', '=', False)]" options="{'no_quick_create':True,'no_create_edit':True, 'no_open':True}"/>
+											<field name="sms_ir_mail_server_id" domain="['|', ('company_id','=', False), ('company_id','=', company_id)]"/>
                     </group>
                   </group>
                   <notebook>
@@ -141,6 +145,12 @@
                     </page>
                   </notebook>
                 </sheet>
+								<footer>
+                  <div class="oe_chatter">
+                    <field name="message_follower_ids" widget="mail_followers" groups="base.group_user"/>
+                    <field name="message_ids" widget="mail_thread"/>
+                  </div>
+                </footer>
             </form>
         </field>
     </record>
@@ -159,9 +169,9 @@
     
     <!-- menu categories -->
     
-    <!-- <menuitem name="Configuracion" id="menu_config" sequence="100" parent="menu_sms"/> -->
-    <menuitem name="Configuracion" id="menu_config_action" parent="menu_sms"
-     action="financiera_sms_config_action" sequence="100"/>
+    <menuitem name="Configuracion" id="menu_sms_config" sequence="100" parent="menu_sms"/>
+    <menuitem name="Configuracion" id="menu_sms_config_action" parent="menu_sms_config"
+     action="financiera_sms_config_action" sequence="1"/>
 
   </data>
 </openerp>

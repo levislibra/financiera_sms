@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 
 from openerp import models, fields, api
-from openerp.exceptions import UserError, ValidationError
-from datetime import datetime, timedelta
-from dateutil import relativedelta
-from random import randint
-import requests
-from lxml.html.clean import Cleaner
-import re
+from openerp.exceptions import UserError
+# from datetime import datetime
+# from dateutil import relativedelta
+# from random import randint
+# import requests
+# from lxml.html.clean import Cleaner
+# import re
 
 class FinancieraSmsMessageMasive(models.Model):
 	_name = 'financiera.sms.message.masive'
@@ -15,6 +15,7 @@ class FinancieraSmsMessageMasive(models.Model):
 	_order = 'id desc'
 	name = fields.Char("Nombre")
 	partner_ids = fields.Many2many('res.partner', 'financiera_partner_messagemasive_rel', 'partner_id', 'masivemessage_id', string='Destinatarios')
+	template_id = fields.Many2one('financiera.sms.message.masive.template', 'Plantilla')
 	tipo = fields.Char('Tipo de mensaje')
 	body_count_available = fields.Integer('Caracteres restantes', compute='_compute_body_count_available')
 	body = fields.Text('Mensaje', size=160)
@@ -66,108 +67,114 @@ class FinancieraSmsMessageMasive(models.Model):
 			if self.body_count_available < 0:
 				raise UserError("Debe borrar al menos %s caracteres."%str(abs(self.body_count_available)))
 
+	@api.onchange('template_id')
+	def _onchange_template_id(self):
+		if self.template_id.tipo:
+			self.tipo = self.template_id.tipo
+		if self.template_id.body:
+			self.body = self.template_id.body
 
 	@api.one
 	def partners_deseleccionar(self):
 		self.partner_ids = [(6, 0, [])]
 
-	@api.one
-	def partners_cuota_preventiva(self):
-		cr = self.env.cr
-		uid = self.env.uid
-		cuota_obj = self.pool.get('financiera.prestamo.cuota')
-		cuota_ids = cuota_obj.search(cr, uid, [
-			('company_id', '=', self.company_id.id),
-			('state_mora', '=', 'preventiva'),
-			('state', '=', 'activa')])
-		partner_obj = self.pool.get('res.partner')
-		partner_ids = partner_obj.search(cr, uid, [
-			('company_id', '=', self.company_id.id),
-			('cuota_ids.id', 'in', cuota_ids)])
-		self.partner_ids = [(6, 0, partner_ids)]
+	# @api.one
+	# def partners_cuota_preventiva(self):
+	# 	cr = self.env.cr
+	# 	uid = self.env.uid
+	# 	cuota_obj = self.pool.get('financiera.prestamo.cuota')
+	# 	cuota_ids = cuota_obj.search(cr, uid, [
+	# 		('company_id', '=', self.company_id.id),
+	# 		('state_mora', '=', 'preventiva'),
+	# 		('state', '=', 'activa')])
+	# 	partner_obj = self.pool.get('res.partner')
+	# 	partner_ids = partner_obj.search(cr, uid, [
+	# 		('company_id', '=', self.company_id.id),
+	# 		('cuota_ids.id', 'in', cuota_ids)])
+	# 	self.partner_ids = [(6, 0, partner_ids)]
 
-	@api.one
-	def partners_cuota_vencida(self):
-		cr = self.env.cr
-		uid = self.env.uid
-		fecha_actual = datetime.now()
-		cuota_obj = self.pool.get('financiera.prestamo.cuota')
-		cuota_ids = cuota_obj.search(cr, uid, [
-			('company_id', '=', self.company_id.id),
-			('fecha_vencimiento', '<', fecha_actual),
-			('state', '=', 'activa')])
-		partner_obj = self.pool.get('res.partner')
-		partner_ids = partner_obj.search(cr, uid, [
-			('company_id', '=', self.company_id.id),
-			('cuota_ids.id', 'in', cuota_ids)])
-		self.partner_ids = [(6, 0, partner_ids)]
+	# @api.one
+	# def partners_cuota_vencida(self):
+	# 	cr = self.env.cr
+	# 	uid = self.env.uid
+	# 	fecha_actual = datetime.now()
+	# 	cuota_obj = self.pool.get('financiera.prestamo.cuota')
+	# 	cuota_ids = cuota_obj.search(cr, uid, [
+	# 		('company_id', '=', self.company_id.id),
+	# 		('fecha_vencimiento', '<', fecha_actual),
+	# 		('state', '=', 'activa')])
+	# 	partner_obj = self.pool.get('res.partner')
+	# 	partner_ids = partner_obj.search(cr, uid, [
+	# 		('company_id', '=', self.company_id.id),
+	# 		('cuota_ids.id', 'in', cuota_ids)])
+	# 	self.partner_ids = [(6, 0, partner_ids)]
 
-	@api.one
-	def partners_cuota_vencida_moraTemprana(self):
-		cr = self.env.cr
-		uid = self.env.uid
-		fecha_actual = datetime.now()
-		cuota_obj = self.pool.get('financiera.prestamo.cuota')
-		cuota_ids = cuota_obj.search(cr, uid, [
-			('company_id', '=', self.company_id.id),
-			('fecha_vencimiento', '<', fecha_actual),
-			('state', '=', 'activa'),
-			('state_mora', '=', 'moraTemprana')])
-		partner_obj = self.pool.get('res.partner')
-		partner_ids = partner_obj.search(cr, uid, [
-			('company_id', '=', self.company_id.id),
-			('cuota_ids.id', 'in', cuota_ids)])
-		self.partner_ids = [(6, 0, partner_ids)]
-	@api.one
-	def partners_cuota_vencida_moraMedia(self):
-		cr = self.env.cr
-		uid = self.env.uid
-		fecha_actual = datetime.now()
-		cuota_obj = self.pool.get('financiera.prestamo.cuota')
-		cuota_ids = cuota_obj.search(cr, uid, [
-			('company_id', '=', self.company_id.id),
-			('fecha_vencimiento', '<', fecha_actual),
-			('state', '=', 'activa'),
-			('state_mora', '=', 'moraMedia')])
-		partner_obj = self.pool.get('res.partner')
-		partner_ids = partner_obj.search(cr, uid, [
-			('company_id', '=', self.company_id.id),
-			('cuota_ids.id', 'in', cuota_ids)])
-		self.partner_ids = [(6, 0, partner_ids)]
+	# @api.one
+	# def partners_cuota_vencida_moraTemprana(self):
+	# 	cr = self.env.cr
+	# 	uid = self.env.uid
+	# 	fecha_actual = datetime.now()
+	# 	cuota_obj = self.pool.get('financiera.prestamo.cuota')
+	# 	cuota_ids = cuota_obj.search(cr, uid, [
+	# 		('company_id', '=', self.company_id.id),
+	# 		('fecha_vencimiento', '<', fecha_actual),
+	# 		('state', '=', 'activa'),
+	# 		('state_mora', '=', 'moraTemprana')])
+	# 	partner_obj = self.pool.get('res.partner')
+	# 	partner_ids = partner_obj.search(cr, uid, [
+	# 		('company_id', '=', self.company_id.id),
+	# 		('cuota_ids.id', 'in', cuota_ids)])
+	# 	self.partner_ids = [(6, 0, partner_ids)]
+	# @api.one
+	# def partners_cuota_vencida_moraMedia(self):
+	# 	cr = self.env.cr
+	# 	uid = self.env.uid
+	# 	fecha_actual = datetime.now()
+	# 	cuota_obj = self.pool.get('financiera.prestamo.cuota')
+	# 	cuota_ids = cuota_obj.search(cr, uid, [
+	# 		('company_id', '=', self.company_id.id),
+	# 		('fecha_vencimiento', '<', fecha_actual),
+	# 		('state', '=', 'activa'),
+	# 		('state_mora', '=', 'moraMedia')])
+	# 	partner_obj = self.pool.get('res.partner')
+	# 	partner_ids = partner_obj.search(cr, uid, [
+	# 		('company_id', '=', self.company_id.id),
+	# 		('cuota_ids.id', 'in', cuota_ids)])
+	# 	self.partner_ids = [(6, 0, partner_ids)]
 	
-	@api.one
-	def partners_cuota_vencida_moraTardia(self):
-		cr = self.env.cr
-		uid = self.env.uid
-		fecha_actual = datetime.now()
-		cuota_obj = self.pool.get('financiera.prestamo.cuota')
-		cuota_ids = cuota_obj.search(cr, uid, [
-			('company_id', '=', self.company_id.id),
-			('fecha_vencimiento', '<', fecha_actual),
-			('state', '=', 'activa'),
-			('state_mora', '=', 'moraTardia')])
-		partner_obj = self.pool.get('res.partner')
-		partner_ids = partner_obj.search(cr, uid, [
-			('company_id', '=', self.company_id.id),
-			('cuota_ids.id', 'in', cuota_ids)])
-		self.partner_ids = [(6, 0, partner_ids)]
+	# @api.one
+	# def partners_cuota_vencida_moraTardia(self):
+	# 	cr = self.env.cr
+	# 	uid = self.env.uid
+	# 	fecha_actual = datetime.now()
+	# 	cuota_obj = self.pool.get('financiera.prestamo.cuota')
+	# 	cuota_ids = cuota_obj.search(cr, uid, [
+	# 		('company_id', '=', self.company_id.id),
+	# 		('fecha_vencimiento', '<', fecha_actual),
+	# 		('state', '=', 'activa'),
+	# 		('state_mora', '=', 'moraTardia')])
+	# 	partner_obj = self.pool.get('res.partner')
+	# 	partner_ids = partner_obj.search(cr, uid, [
+	# 		('company_id', '=', self.company_id.id),
+	# 		('cuota_ids.id', 'in', cuota_ids)])
+	# 	self.partner_ids = [(6, 0, partner_ids)]
 
-	@api.one
-	def partners_cuota_vencida_incobrable(self):
-		cr = self.env.cr
-		uid = self.env.uid
-		fecha_actual = datetime.now()
-		cuota_obj = self.pool.get('financiera.prestamo.cuota')
-		cuota_ids = cuota_obj.search(cr, uid, [
-			('company_id', '=', self.company_id.id),
-			('fecha_vencimiento', '<', fecha_actual),
-			('state', '=', 'activa'),
-			('state_mora', '=', 'incobrable')])
-		partner_obj = self.pool.get('res.partner')
-		partner_ids = partner_obj.search(cr, uid, [
-			('company_id', '=', self.company_id.id),
-			('cuota_ids.id', 'in', cuota_ids)])
-		self.partner_ids = [(6, 0, partner_ids)]
+	# @api.one
+	# def partners_cuota_vencida_incobrable(self):
+	# 	cr = self.env.cr
+	# 	uid = self.env.uid
+	# 	fecha_actual = datetime.now()
+	# 	cuota_obj = self.pool.get('financiera.prestamo.cuota')
+	# 	cuota_ids = cuota_obj.search(cr, uid, [
+	# 		('company_id', '=', self.company_id.id),
+	# 		('fecha_vencimiento', '<', fecha_actual),
+	# 		('state', '=', 'activa'),
+	# 		('state_mora', '=', 'incobrable')])
+	# 	partner_obj = self.pool.get('res.partner')
+	# 	partner_ids = partner_obj.search(cr, uid, [
+	# 		('company_id', '=', self.company_id.id),
+	# 		('cuota_ids.id', 'in', cuota_ids)])
+	# 	self.partner_ids = [(6, 0, partner_ids)]
 
 	@api.one
 	def send_messages(self):
@@ -190,3 +197,4 @@ class FinancieraSmsMessageMasive(models.Model):
 			self.state = 'send'
 		else:
 			raise UserError("Debe agregar al menos un destinatario.")
+

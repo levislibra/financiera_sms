@@ -85,9 +85,10 @@
 
     <!-- menu categories -->
 
-    <!-- <menuitem name="Mensajes" id="menu_message" sequence="0" parent="menu_sms"/> -->
-    <menuitem name="Mensajes" id="menu_message_action" parent="menu_sms" 
-    action="financiera_sms_message_action" sequence="0"/>
+    <menuitem name="Mensajes" id="menu_message" sequence="0" parent="menu_sms"/>
+    
+		<menuitem name="Buzon de salida" id="menu_message_action" parent="menu_message" 
+    	action="financiera_sms_message_action" sequence="0"/>
 
     
   </data>

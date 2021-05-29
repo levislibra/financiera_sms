@@ -12,7 +12,6 @@
 					<field name="name"/>
           <field name="tipo"/>
 					<field name="body"/>
-					<field name="partner_ids" widget="many2many_tags"/>
 					<field name="state"/>
           <field name="company_id" groups="base.group_erp_manager"/>
         </tree>
@@ -52,26 +51,24 @@
               <group>
                 <field name="company_id" groups="base.group_erp_manager"/>
 								<field name="create_date" string="Fecha" readonly="1"/>
-                <field name="partner_ids" widget="many2many_tags"/>
+								<label string=" "/><button name="partners_deseleccionar" string="Eliminar seleccion" states="draft" class="oe_link" type="object"/>
+                <field name="partner_ids" options="{'no_quick_create':True,'no_create_edit':True, 'no_open':True}">
+									<tree editable="top" limit="20">
+										<field name="name"/>
+										<field name="mobile"/>
+										<field name="email"/>
+									</tree>
+								</field>
+              </group>
+              <group>
+								<field name="template_id" options="{'no_quick_create':True,'no_create_edit':True, 'no_open':True}"/>
 								<field name="tipo"/>
 								<field name="body_count_available"/>
-								<field name="body"/>
+								<field name="body" style="background-color: lightsteelblue;border-radius:10px;padding:10px;"/>
 								<label for="links" string=" "/>
 								<span>Agregue link a Whatsapp: https://wa.me/+549{numero de contacto}?text=Hola</span>
 								<field name="is_html"/>
 								<field name="html" widget="html" attrs="{'invisible': [('is_html','=',False)]}"/>
-              </group>
-              <group>
-								<label for="buttons" string=" "/>
-								<div>
-									<button name="partners_cuota_vencida" string="Clientes con cuotas vencidas" states="draft" class="oe_link" type="object"/>
-									<button name="partners_cuota_preventiva" string="Clientes con cuotas en preventivo" states="draft" class="oe_link" type="object"/>
-									<button name="partners_cuota_vencida_moraTemprana" string="Clientes con cuotas en mora Temprana" states="draft" class="oe_link" type="object"/>
-									<button name="partners_cuota_vencida_moraMedia" string="Clientes con cuotas en mora Media" states="draft" class="oe_link" type="object"/>
-									<button name="partners_cuota_vencida_moraTardia" string="Clientes con cuotas en mora Tardia" states="draft" class="oe_link" type="object"/>
-									<button name="partners_cuota_vencida_incobrable" string="Clientes con cuotas incobrable" states="draft" class="oe_link" type="object"/><br/>
-									<button name="partners_deseleccionar" string="Eliminar seleccion" states="draft" class="oe_link" type="object"/>
-								</div>
 							</group>
 						</group>
 						<notebook>
@@ -86,7 +83,6 @@
 
     <record model="ir.actions.act_window" id="financiera_sms_message_masive_action">
       <field name="name">Mensajes Masivos</field>
-      <!-- <field name="context">{'search_default_enviados': 1}</field> -->
       <field name="res_model">financiera.sms.message.masive</field>
       <field name="view_mode">tree,form</field>
       <field name="view_id" ref="financiera_sms_message_masive_tree"/>
@@ -96,7 +92,7 @@
     <!-- menu categories -->
 
     <!-- Desde Modulo SMS -->
-    <menuitem name="Mensajes masivos" id="menu_sms_message_masive_action" parent="menu_sms" 
+    <menuitem name="Masivos" id="menu_sms_message_masive_action" parent="menu_message" 
     	action="financiera_sms_message_masive_action" sequence="1"/>
 		<!-- Desde Modulo Cobranza y seguimiento -->
 		<menuitem name="Mensajes masivos" id="menu_cobranza_message_masive_action" parent="financiera_cobranza_mora.menu_cobranza" 

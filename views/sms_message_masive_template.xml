@@ -1,0 +1,46 @@
+<openerp>
+  <data>
+
+    <!-- Financiera SMS template -->
+
+    <record model="ir.ui.view" id="financiera_sms_message_masive_template_tree">
+      <field name="name">financiera.sms.message.masive.template.tree</field>
+      <field name="model">financiera.sms.message.masive.template</field>
+      <field name="arch" type="xml">
+        <tree>
+          <field name="tipo"/>
+					<field name="body"/>
+          <field name="company_id" groups="base.group_erp_manager"/>
+        </tree>
+      </field>
+    </record>
+
+    <record id="financiera_sms_message_masive_template_form" model="ir.ui.view">
+      <field name="name">financiera.sms.message.masive.template.form</field>
+      <field name="model">financiera.sms.message.masive.template</field>
+      <field name="arch" type="xml">
+        <form string="Plantilla de SMS">
+          <sheet>
+            <group>
+							<field name="company_id" groups="base.group_erp_manager"/>
+							<field name="tipo"/>
+							<field name="body"/>
+						</group>
+          </sheet>
+        </form>
+      </field>
+    </record>
+
+    <record model="ir.actions.act_window" id="financiera_sms_message_masive_template_action">
+      <field name="name">Plantilla SMS</field>
+      <field name="res_model">financiera.sms.message.masive.template</field>
+      <field name="view_mode">tree,form</field>
+      <field name="view_id" ref="financiera_sms_message_masive_template_tree"/>
+    </record>
+
+    <!-- Plantilla SMS -->
+    <menuitem name="Plantilla SMS" id="menu_sms_message_masive_template_action" parent="menu_sms_config" 
+    	action="financiera_sms_message_masive_template_action" sequence="10"/>
+    
+  </data>
+</openerp>

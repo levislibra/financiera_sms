@@ -31,6 +31,7 @@
 				'views/sms_message_response.xml',
 				'views/sms_message_masive.xml',
         'views/extends_res_company.xml',
+				'views/sms_message_masive_template.xml',
         'data/ir_cron.xml',
     ],
     # only loaded in demonstration mode
