@@ -31,5 +31,4 @@ class ExtendsMailMail(models.Model):
 					message_id = self.env['financiera.sms.message'].create(sms_message_values)
 					message_id.set_message_code(sms_configuracion_id.tc_mensaje, prestamo_id.email_tc_code)
 					message_id.send()
-					sms_configuracion_id.actualizar_saldo()
 					prestamo_id.email_tc_code_sent = True

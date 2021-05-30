@@ -3,7 +3,9 @@
 from openerp import models, fields, api
 from openerp.exceptions import ValidationError
 import requests
-import random
+import logging
+
+_logger = logging.getLogger(__name__)
 class FinancieraSmsConfig(models.Model):
 	_name = 'financiera.sms.config'
 	_inherit = ['mail.thread', 'ir.needaction_mixin']
@@ -16,6 +18,7 @@ class FinancieraSmsConfig(models.Model):
 	sms_texto_test = fields.Char('Mensaje de prueba', size=120)
 	sms_message_masive_count = fields.Integer("SMS masivo id", default=1)
 	sms_alert_email = fields.Boolean("Activar alerta de saldo por email")
+	sms_alerta_saldo = fields.Integer("Saldo menor a", default=50)
 	sms_responsable_user_id = fields.Many2one('res.users', 'Usuario responsable', help='Se enviara email cuando el saldo de sms sea bajo.')
 	sms_ir_mail_server_id = fields.Many2one('ir.mail_server', 'Servidor saliente')
 	company_id = fields.Many2one('res.company', 'Empresa')
@@ -129,10 +132,24 @@ class FinancieraSmsConfig(models.Model):
 		if r.status_code != 200:
 			raise ValidationError("Error de envio. Motivo: " + r.reason + ". Contacte con Librasoft.")
 		else:
-			raise UserWarning(r.text)
+			raise ValidationError(r.text)
+
+	@api.model
+	def _cron_actualizar_saldo(self):
+		cr = self.env.cr
+		uid = self.env.uid
+		company_obj = self.pool.get('res.company')
+		comapny_ids = company_obj.search(cr, uid, [])
+		_logger.info('SMS: controlar saldo SMS.')
+		for _id in comapny_ids:
+			company_id = company_obj.browse(cr, uid, _id)
+			print("SMS company: ", company_id.name)
+			if len(company_id.sms_configuracion_id) > 0:
+				sms_configuracion_id = company_id.sms_configuracion_id
+				sms_configuracion_id.actualizar_saldo(False)
 
 	@api.one
-	def actualizar_saldo(self):
+	def actualizar_saldo(self, show_error=True):
 		params = {
 			'usuario': self.usuario,
 			'clave': self.password,
@@ -140,9 +157,9 @@ class FinancieraSmsConfig(models.Model):
 		r = requests.get('http://servicio.smsmasivos.com.ar/obtener_saldo.asp?', params=params)
 		if r.status_code == 200:
 			self.sms_saldo = int(r.content)
-			if self.sms_alert_email and (self.sms_saldo in [500, 200, 100, 50, 20, 10, 5, 1, 0]):
+			if self.sms_alert_email and self.sms_saldo < self.sms_alerta_saldo:
 				self.send_mail_sms_balance_low()
-		else:
+		elif show_error:
 			raise ValidationError("Error de conexion. Motivo: " + r.reason + ". Contacte con Librasoft.")
 
 

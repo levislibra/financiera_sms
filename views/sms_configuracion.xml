@@ -38,6 +38,7 @@
                       <field name="sms_texto_test"/>
 											<separate string="Alerta saldo" colspan="2"/>
 											<field name="sms_alert_email"/>
+											<field name="sms_alerta_saldo"/>
 											<field name="sms_responsable_user_id" domain="[('company_id','=', company_id),('share', '=', False)]" options="{'no_quick_create':True,'no_create_edit':True, 'no_open':True}"/>
 											<field name="sms_ir_mail_server_id" domain="['|', ('company_id','=', False), ('company_id','=', company_id)]"/>
                     </group>

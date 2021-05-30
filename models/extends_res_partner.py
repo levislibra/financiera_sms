@@ -27,5 +27,4 @@ class ExtendsResPartner(models.Model):
 			self.app_codigo = codigo
 			message_id.set_message_code(sms_configuracion_id.validacion_celular_mensaje, codigo)
 			message_id.send()
-			sms_configuracion_id.actualizar_saldo()
 		return True

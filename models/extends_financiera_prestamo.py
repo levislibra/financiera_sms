@@ -29,7 +29,6 @@ class ExtendsFinancieraPrestamo(models.Model):
 			codigo = self.email_tc_code
 			message_id.set_message_code(sms_configuracion_id.metodo_sms_tc_mensaje, codigo)
 			message_id.send()
-			sms_configuracion_id.actualizar_saldo()
 			self.sms_aceptacion_tc_id = message_id.id
 	
 	@api.multi
