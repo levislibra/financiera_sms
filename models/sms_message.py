@@ -5,7 +5,7 @@ from datetime import datetime
 from dateutil import relativedelta
 import requests
 
-
+URL_ENVIAR_SMS = 'http://servicio.smsmasivos.com.ar/enviar_sms.asp?api=1'
 class FinancieraSmsMessage(models.Model):
 	_name = 'financiera.sms.message'
 
@@ -26,6 +26,16 @@ class FinancieraSmsMessage(models.Model):
 	respuesta_ids = fields.One2many('financiera.sms.message.response', 'sms_message_id', 'Respuestas')
 
 	@api.model
+	def default_get(self, fields):
+		rec = super(FinancieraSmsMessage, self).default_get(fields)
+		rec.update({
+			'company_id': self.env.user.company_id.id,
+			'config_id': self.env.user.company_id.sms_configuracion_id.id,
+			'tipo': "Manual",
+		})
+		return rec
+
+	@api.model
 	def create(self, values):
 		rec = super(FinancieraSmsMessage, self).create(values)
 		rec.update({
@@ -33,30 +43,44 @@ class FinancieraSmsMessage(models.Model):
 		})
 		return rec
 
+
+	@api.onchange('partner_id')
+	def _onchange_partner_id(self):
+		if self.partner_id:
+			self.to = self.partner_id.mobile
+
 	@api.one
 	def send(self):
-		if self.to != False and len(self.to) == 10 and self.body != False:
-			params = {
-				'usuario': self.config_id.usuario,
-				'clave': self.config_id.password,
-				'tos': self.to,
-				'texto': self.body,
-			}
-			if self.html:
-				if self.tipo == 'TC aceptacion':
-					params['idinterno'] = self.id_interno
-				params['texto'] = self.body + " http://1rck.in/-000000"
-				params['html'] = self.html
-			r = requests.get('http://servicio.smsmasivos.com.ar/enviar_sms.asp?api=1', params=params)
-			self.error_message = r.reason
-			if r.status_code == 200:
-				self.status = "Enviado"
-		else:
-			if self.body == False:
-				self.error_message = "Mensaje vacio"
-			else:
-				self.error_message = "Numero destino"
-			self.status = "No enviado"
+		params = {
+			'usuario': self.config_id.usuario,
+			'clave': self.config_id.password,
+			'tos': self.to,
+			'texto': self.body,
+			'test': 1,
+			'respuestanumerica': 1,
+			'idinterno': str(self.id),
+		}
+		if self.html:
+			params['texto'] = self.body + " http://1rck.in/-000000"
+			params['html'] = self.html
+		r = requests.get(URL_ENVIAR_SMS, params=params)
+		if r.status_code == 200:
+			resultado = r.text.split(';')
+			if len(resultado) > 1:
+				self.status = resultado[0]
+				detalle = resultado[1].split(".")
+				self.error_message = detalle[0]
+
+	@api.one
+	def create_response(self, origen, texto):
+		params = {
+			'partner_id': self.partner_id.id,
+			'mobile': origen,
+			'text': texto,
+			'sms_message_id': self.id,
+			'company_id': self.company_id.id,
+		}
+		response_id = self.env['financiera.sms.message.response'].create(params)
 
 	@api.one
 	def set_message(self, mensaje, tipo_mensaje, cuota_id, partner_id, var1, var2, var3):

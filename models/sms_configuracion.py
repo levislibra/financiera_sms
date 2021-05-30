@@ -1,12 +1,9 @@
 # -*- coding: utf-8 -*-
 
 from openerp import models, fields, api
-from openerp.exceptions import UserError, ValidationError
-from datetime import datetime, timedelta
-from dateutil import relativedelta
-import time
+from openerp.exceptions import ValidationError
 import requests
-
+import random
 class FinancieraSmsConfig(models.Model):
 	_name = 'financiera.sms.config'
 	_inherit = ['mail.thread', 'ir.needaction_mixin']
@@ -122,12 +119,17 @@ class FinancieraSmsConfig(models.Model):
 		params = {
 			'usuario': self.usuario,
 			'clave': self.password,
+			'idinterno': 8,
 			'tos': self.sms_numero_test,
 			'texto': self.sms_texto_test,
+			# 'test': 1,
+			'respuestanumerica': 1,
 		}
 		r = requests.get('http://servicio.smsmasivos.com.ar/enviar_sms.asp?api=1', params=params)
 		if r.status_code != 200:
 			raise ValidationError("Error de envio. Motivo: " + r.reason + ". Contacte con Librasoft.")
+		else:
+			raise UserWarning(r.text)
 
 	@api.one
 	def actualizar_saldo(self):
@@ -138,7 +140,7 @@ class FinancieraSmsConfig(models.Model):
 		r = requests.get('http://servicio.smsmasivos.com.ar/obtener_saldo.asp?', params=params)
 		if r.status_code == 200:
 			self.sms_saldo = int(r.content)
-			if self.sms_alert_email and (self.sms_saldo in [500, 200, 100, 50, 20, 10, 5, 0]):
+			if self.sms_alert_email and (self.sms_saldo in [500, 200, 100, 50, 20, 10, 5, 1, 0]):
 				self.send_mail_sms_balance_low()
 		else:
 			raise ValidationError("Error de conexion. Motivo: " + r.reason + ". Contacte con Librasoft.")

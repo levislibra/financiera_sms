@@ -1,20 +1,23 @@
 # -*- coding: utf-8 -*-
 from openerp import http
+from openerp.http import request
+import logging
+import json
 
-# class FinancieraSms(http.Controller):
-#     @http.route('/financiera_sms/financiera_sms/', auth='public')
-#     def index(self, **kw):
-#         return "Hello, world"
+_logger = logging.getLogger(__name__)
+# /financiera.sms/webhook?numero=*ORIGEN*&respuesta=*TEXTO*&idinterno=*IDINTERNO*
+# @http.route('/mail/<string:res_model>/<int:res_id>/avatar/<int:partner_id>', type='http', auth='public')
+#     def avatar(self, res_model, res_id, partner_id):
+class FinancieraSMSWebhookController(http.Controller):
 
-#     @http.route('/financiera_sms/financiera_sms/objects/', auth='public')
-#     def list(self, **kw):
-#         return http.request.render('financiera_sms.listing', {
-#             'root': '/financiera_sms/financiera_sms',
-#             'objects': http.request.env['financiera_sms.financiera_sms'].search([]),
-#         })
+	@http.route("/financiera.sms/webhook/<string:origen>/<string:texto>/<int:idinterno>", type='http', auth='public')
+	def webhook_listener(self, origen, texto, idinterno):
+		_logger.info('SMS: nuevo webhook.')
+		print("Numero: ", origen)
+		print("Texto: ", texto)
+		print("idinterno: ", idinterno)
+		sms_id = request.env['financiera.sms.message'].sudo().browse(idinterno)
+		if sms_id:
+			sms_id.create_response(origen, texto)
+		return json.dumps("OK")
 
-#     @http.route('/financiera_sms/financiera_sms/objects/<model("financiera_sms.financiera_sms"):obj>/', auth='public')
-#     def object(self, obj, **kw):
-#         return http.request.render('financiera_sms.object', {
-#             'object': obj
-#         })
