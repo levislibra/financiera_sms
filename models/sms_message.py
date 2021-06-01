@@ -56,7 +56,7 @@ class FinancieraSmsMessage(models.Model):
 			'clave': self.config_id.password,
 			'tos': self.to,
 			'texto': self.body,
-			'test': 1,
+			# 'test': 1,
 			'respuestanumerica': 1,
 			'idinterno': str(self.id),
 		}
