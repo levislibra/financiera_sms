@@ -92,10 +92,10 @@
     <!-- menu categories -->
 
     <!-- Desde Modulo SMS -->
-    <menuitem name="Masivos" id="menu_sms_message_masive_action" parent="menu_message" 
-    	action="financiera_sms_message_masive_action" sequence="1"/>
+    <menuitem name="Enviar SMS" id="menu_sms_message_masive_action" parent="menu_message" 
+    	action="financiera_sms_message_masive_action" sequence="5"/>
 		<!-- Desde Modulo Cobranza y seguimiento -->
-		<menuitem name="Mensajes masivos" id="menu_cobranza_message_masive_action" parent="financiera_cobranza_mora.menu_cobranza" 
+		<menuitem name="Enviar SMS" id="menu_cobranza_message_masive_action" parent="financiera_cobranza_mora.menu_cobranza" 
     	action="financiera_sms_message_masive_action" sequence="25"/>
     
   </data>

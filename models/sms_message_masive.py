@@ -2,13 +2,6 @@
 
 from openerp import models, fields, api
 from openerp.exceptions import UserError
-# from datetime import datetime
-# from dateutil import relativedelta
-# from random import randint
-# import requests
-# from lxml.html.clean import Cleaner
-# import re
-
 class FinancieraSmsMessageMasive(models.Model):
 	_name = 'financiera.sms.message.masive'
 

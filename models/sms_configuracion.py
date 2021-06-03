@@ -143,7 +143,6 @@ class FinancieraSmsConfig(models.Model):
 		_logger.info('SMS: controlar saldo SMS.')
 		for _id in comapny_ids:
 			company_id = company_obj.browse(cr, uid, _id)
-			print("SMS company: ", company_id.name)
 			if len(company_id.sms_configuracion_id) > 0:
 				sms_configuracion_id = company_id.sms_configuracion_id
 				sms_configuracion_id.actualizar_saldo(False)

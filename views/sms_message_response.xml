@@ -70,8 +70,8 @@
 
     <!-- menu categories -->
 
-    <menuitem name="Respuestas" id="menu_message_response_action" parent="menu_message" 
-    action="financiera_sms_message_response_action" sequence="0"/>
+    <menuitem name="Buzon de entrada" id="menu_message_response_action" parent="menu_message" 
+    action="financiera_sms_message_response_action" sequence="20"/>
 
     
   </data>

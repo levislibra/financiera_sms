@@ -32,6 +32,7 @@
 				'views/sms_message_masive.xml',
         'views/extends_res_company.xml',
 				'views/sms_message_masive_template.xml',
+				'wizards/sms_prestamo_wizard.xml',
         'data/ir_cron.xml',
     ],
     # only loaded in demonstration mode
