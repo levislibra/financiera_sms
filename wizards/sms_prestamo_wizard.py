@@ -20,8 +20,6 @@ class FinancieraPagos360SmsPrestamoWizard(models.TransientModel):
 		context = dict(self._context or {})
 		active_ids = context.get('active_ids')
 		active_model = context.get('active_model')
-		print("active_model: ", active_model)
-		print("active_ids: ", active_ids)
 		if active_model == 'financiera.prestamo':
 			partner_ids = []
 			for _id in active_ids:
