@@ -28,3 +28,21 @@ class ExtendsResPartner(models.Model):
 			message_id.set_message_code(sms_configuracion_id.validacion_celular_mensaje, codigo)
 			message_id.send()
 		return True
+	
+	@api.multi
+	def wizard_enviar_sms(self):
+		self.ensure_one()
+		params = {}
+		view_id = self.env['financiera.pagos.360.sms.prestamo.wizard']
+		new = view_id.create(params)
+		return {
+			'name': 'Enviar sms',
+			'type': 'ir.actions.act_window',
+			'view_type': 'form',
+			'view_mode': 'form',
+			'res_model': 'financiera.pagos.360.sms.prestamo.wizard',
+			'res_id': new.id,
+			'views': [(view_id.id, 'form')],
+			'view_id': view_id.id,
+			'target': 'new',
+		}

@@ -19,11 +19,16 @@ class FinancieraPagos360SmsPrestamoWizard(models.TransientModel):
 	def send_sms(self):
 		context = dict(self._context or {})
 		active_ids = context.get('active_ids')
-		partner_ids = []
-		for _id in active_ids:
-			prestamo_id = self.env['financiera.prestamo'].browse(_id)
-			partner_ids.append(prestamo_id.partner_id.id)
-		print("partner_ids:: ", partner_ids)
+		active_model = context.get('active_model')
+		print("active_model: ", active_model)
+		print("active_ids: ", active_ids)
+		if active_model == 'financiera.prestamo':
+			partner_ids = []
+			for _id in active_ids:
+				prestamo_id = self.env['financiera.prestamo'].browse(_id)
+				partner_ids.append(prestamo_id.partner_id.id)
+		if active_model == 'res.partner':
+			partner_ids = active_ids
 		sms_message_masive_values = {
 			'partner_ids': [(6,0, partner_ids)],
 			'template_id': self.template_id.id,

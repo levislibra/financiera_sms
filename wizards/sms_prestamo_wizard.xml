@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <odoo>
 
-    <!-- Ejecutar debitos -->
-
     <record id="sms_prestamo_wizard" model="ir.ui.view">
         <field name="name">Enviar sms</field>
         <field name="model">financiera.pagos.360.sms.prestamo.wizard</field>
@@ -32,6 +30,16 @@
 		<act_window id="action_sms_prestamo"
 			name="Enviar sms"
 			src_model="financiera.prestamo"
+			res_model="financiera.pagos.360.sms.prestamo.wizard"
+			view_id="sms_prestamo_wizard"
+			view_type="form" view_mode="form"
+			key2="client_action_multi" target="new"
+			groups="financiera_sms.user"
+		/>
+
+		<act_window id="action_sms_partner"
+			name="Enviar sms"
+			src_model="res.partner"
 			res_model="financiera.pagos.360.sms.prestamo.wizard"
 			view_id="sms_prestamo_wizard"
 			view_type="form" view_mode="form"
