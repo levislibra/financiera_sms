@@ -147,6 +147,13 @@ class FinancieraSmsConfig(models.Model):
 				sms_configuracion_id = company_id.sms_configuracion_id
 				sms_configuracion_id.actualizar_saldo(False)
 
+	def representsInt(self, s):
+		try:
+			int(s)
+			return True
+		except ValueError:
+			return False
+
 	@api.one
 	def actualizar_saldo(self, show_error=True):
 		params = {
@@ -155,9 +162,12 @@ class FinancieraSmsConfig(models.Model):
 		}
 		r = requests.get('http://servicio.smsmasivos.com.ar/obtener_saldo.asp?', params=params)
 		if r.status_code == 200:
-			self.sms_saldo = int(r.content)
-			if self.sms_alert_email and self.sms_saldo < self.sms_alerta_saldo:
-				self.send_mail_sms_balance_low()
+			if self.representsInt(r.content):
+				self.sms_saldo = int(r.content)
+				if self.sms_alert_email and self.sms_saldo < self.sms_alerta_saldo:
+					self.send_mail_sms_balance_low()
+			else:
+				self.sms_saldo = -1
 		elif show_error:
 			raise ValidationError("Error de conexion. Motivo: " + r.reason + ". Contacte con Librasoft.")
 

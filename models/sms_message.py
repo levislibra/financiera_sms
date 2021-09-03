@@ -286,4 +286,4 @@ class FinancieraSmsMessage(models.Model):
 									sms_configuracion_id.notificacion_deuda_var_2,
 									sms_configuracion_id.notificacion_deuda_var_3)
 								message_id.send()
-				sms_configuracion_id.actualizar_saldo()
+				# sms_configuracion_id.actualizar_saldo()
