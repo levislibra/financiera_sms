@@ -142,19 +142,18 @@ class FinancieraSmsMessage(models.Model):
 					if sms_configuracion_id.preventivo_cuarto_envio_dias_antes > 0:
 						fecha = fecha_actual + relativedelta.relativedelta(days=sms_configuracion_id.preventivo_cuarto_envio_dias_antes)
 						fechas_preventiva.append(fecha)
-					cuota_obj = self.pool.get('financiera.prestamo.cuota')
-					cuota_ids = cuota_obj.search(cr, uid, [
+					partner_obj = self.pool.get('res.partner')
+					partner_ids = partner_obj.search(cr, uid, [
 						('company_id', '=', company_id.id),
-						('prestamo_id.state', '=', 'acreditado'),
-						('state', '=', 'activa'),
-						('fecha_vencimiento', 'in', fechas_preventiva)])
-					for _id in cuota_ids:
-						cuota_id = cuota_obj.browse(cr, uid, _id)
+						('proxima_cuota_id.fecha_vencimiento', 'in', fechas_preventiva)])
+					for _id in partner_ids:
+						partner_id = partner_obj.browse(cr, uid, _id)
+						cuota_id = partner_id.proxima_cuota_id
 						if cuota_id.saldo > 0:
 							sms_message_values = {
-								'partner_id': cuota_id.partner_id.id,
+								'partner_id': partner_id.id,
 								'config_id': sms_configuracion_id.id,
-								'to': cuota_id.partner_id.mobile or False,
+								'to': partner_id.mobile or False,
 								'tipo': 'Preventivo',
 								'company_id': company_id.id,
 							}
@@ -163,7 +162,7 @@ class FinancieraSmsMessage(models.Model):
 								sms_configuracion_id.preventivo_mensaje,
 								'preventivo', 
 								cuota_id, 
-								cuota_id.partner_id,
+								partner_id,
 								sms_configuracion_id.preventivo_var_1,
 								sms_configuracion_id.preventivo_var_2,
 								sms_configuracion_id.preventivo_var_3)
@@ -186,19 +185,18 @@ class FinancieraSmsMessage(models.Model):
 					if sms_configuracion_id.cuota_vencida_quinto_envio_dias_despues > 0:
 						fecha = fecha_actual - relativedelta.relativedelta(days=sms_configuracion_id.cuota_vencida_quinto_envio_dias_despues)
 						fechas_cuota_vencida.append(fecha)
-					cuota_obj = self.pool.get('financiera.prestamo.cuota')
-					cuota_ids = cuota_obj.search(cr, uid, [
+					partner_obj = self.pool.get('res.partner')
+					partner_ids = partner_obj.search(cr, uid, [
 						('company_id', '=', company_id.id),
-						('prestamo_id.state', '=', 'acreditado'),
-						('state', '=', 'activa'),
-						('fecha_vencimiento', 'in', fechas_cuota_vencida)])
-					for _id in cuota_ids:
-						cuota_id = cuota_obj.browse(cr, uid, _id)
+						('proxima_cuota_id.fecha_vencimiento', 'in', fechas_cuota_vencida)])
+					for _id in partner_ids:
+						partner_id = partner_obj.browse(cr, uid, _id)
+						cuota_id = partner_id.proxima_cuota_id
 						if cuota_id.saldo > 0:
 							sms_message_values = {
-								'partner_id': cuota_id.partner_id.id,
+								'partner_id': partner_id.id,
 								'config_id': sms_configuracion_id.id,
-								'to': cuota_id.partner_id.mobile or False,
+								'to': partner_id.mobile or False,
 								'tipo': 'Cuota vencida',
 								'company_id': company_id.id,
 							}
@@ -207,7 +205,7 @@ class FinancieraSmsMessage(models.Model):
 								sms_configuracion_id.cuota_vencida_mensaje,
 								'cuota_vencida',
 								cuota_id,
-								cuota_id.partner_id,
+								partner_id,
 								sms_configuracion_id.cuota_vencida_var_1,
 								sms_configuracion_id.cuota_vencida_var_2,
 								sms_configuracion_id.cuota_vencida_var_3)
@@ -230,19 +228,18 @@ class FinancieraSmsMessage(models.Model):
 					if sms_configuracion_id.cuota_vencida_mora_media_quinto_envio_dias_despues > 0:
 						fecha = fecha_actual - relativedelta.relativedelta(days=sms_configuracion_id.cuota_vencida_mora_media_quinto_envio_dias_despues)
 						fechas_cuota_vencida_mora_media.append(fecha)
-					cuota_obj = self.pool.get('financiera.prestamo.cuota')
-					cuota_ids = cuota_obj.search(cr, uid, [
+					partner_obj = self.pool.get('res.partner')
+					partner_ids = partner_obj.search(cr, uid, [
 						('company_id', '=', company_id.id),
-						('prestamo_id.state', '=', 'acreditado'),
-						('state', '=', 'activa'),
-						('fecha_vencimiento', 'in', fechas_cuota_vencida_mora_media)])
-					for _id in cuota_ids:
-						cuota_id = cuota_obj.browse(cr, uid, _id)
+						('proxima_cuota_id.fecha_vencimiento', 'in', fechas_cuota_vencida_mora_media)])
+					for _id in partner_ids:
+						partner_id = partner_obj.browse(cr, uid, _id)
+						cuota_id = partner_id.proxima_cuota_id
 						if cuota_id.saldo > 0:
 							sms_message_values = {
-								'partner_id': cuota_id.partner_id.id,
+								'partner_id': partner_id.id,
 								'config_id': sms_configuracion_id.id,
-								'to': cuota_id.partner_id.mobile or False,
+								'to': partner_id.mobile or False,
 								'tipo': 'Cuota vencida',
 								'company_id': company_id.id,
 							}
@@ -251,7 +248,7 @@ class FinancieraSmsMessage(models.Model):
 								sms_configuracion_id.cuota_vencida_mora_media_mensaje,
 								'cuota_vencida',
 								cuota_id,
-								cuota_id.partner_id,
+								partner_id,
 								sms_configuracion_id.cuota_vencida_mora_media_var_1,
 								sms_configuracion_id.cuota_vencida_mora_media_var_2,
 								sms_configuracion_id.cuota_vencida_mora_media_var_3)
