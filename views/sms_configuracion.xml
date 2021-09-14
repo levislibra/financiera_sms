@@ -104,6 +104,34 @@
                         </group>
                       </group>
                     </page>
+										<page string="SMS prestamo pendiente">
+                      <group>
+												<group>
+													<field name="prestamo_pendiente_activar"/>
+													<field name="prestamo_pendiente_tipo_id" domain="[('company_id','=', company_id)]" attrs="{'invisible': [('prestamo_pendiente_activar', '=', False)], 'required': [('prestamo_pendiente_activar', '=', True)]}"/>
+                          <field name="prestamo_pendiente_mensaje_1" placeholder="Hola {{1}}. Opcion de mensaje 1."
+                            attrs="{'invisible': [('prestamo_pendiente_activar', '=', False)], 'required': [('prestamo_pendiente_activar', '=', True)]}"/>
+													<field name="prestamo_pendiente_mensaje_2" placeholder="Hola {{1}}. Opcion de mensaje 2."
+                            attrs="{'invisible': [('prestamo_pendiente_activar', '=', False)], 'required': [('prestamo_pendiente_activar', '=', True)]}"/>
+													<field name="prestamo_pendiente_mensaje_3" placeholder="Hola {{1}}. Opcion de mensaje 3."
+                            attrs="{'invisible': [('prestamo_pendiente_activar', '=', False)], 'required': [('prestamo_pendiente_activar', '=', True)]}"/>
+													<field name="prestamo_pendiente_mensaje_4" placeholder="Hola {{1}}. Opcion de mensaje 4."
+                            attrs="{'invisible': [('prestamo_pendiente_activar', '=', False)], 'required': [('prestamo_pendiente_activar', '=', True)]}"/>
+												</group>
+												<group>
+													<field name="prestamo_pendiente_dias_despues" attrs="{'invisible': [('prestamo_pendiente_activar', '=', False)]}"/>
+													<field name="prestamo_pendiente_segundo_envio_dias_despues" attrs="{'invisible': [('prestamo_pendiente_activar', '=', False)]}"/>
+													<field name="prestamo_pendiente_tercer_envio_dias_despues" attrs="{'invisible': [('prestamo_pendiente_activar', '=', False)]}"/>
+													<field name="prestamo_pendiente_cuarto_envio_dias_despues" attrs="{'invisible': [('prestamo_pendiente_activar', '=', False)]}"/>
+													<field name="prestamo_pendiente_quinto_envio_dias_despues" attrs="{'invisible': [('prestamo_pendiente_activar', '=', False)]}"/>
+													<field name="prestamo_pendiente_sexto_envio_dias_despues" attrs="{'invisible': [('prestamo_pendiente_activar', '=', False)]}"/>
+													<field name="prestamo_pendiente_septimo_envio_dias_despues" attrs="{'invisible': [('prestamo_pendiente_activar', '=', False)]}"/>
+													<field name="prestamo_pendiente_octavo_envio_dias_despues" attrs="{'invisible': [('prestamo_pendiente_activar', '=', False)]}"/>
+													<field name="prestamo_pendiente_noveno_envio_dias_despues" attrs="{'invisible': [('prestamo_pendiente_activar', '=', False)]}"/>
+													<field name="prestamo_pendiente_decimo_envio_dias_despues" attrs="{'invisible': [('prestamo_pendiente_activar', '=', False)]}"/>
+												</group>
+                      </group>
+                    </page>
                     <page string="Mensaje del codigo de Terminos y Condiciones">
                       <group>
                         <group>

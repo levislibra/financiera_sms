@@ -67,7 +67,6 @@ class FinancieraSmsConfig(models.Model):
 	cuota_vencida_mora_media_activar = fields.Boolean("Activar mensaje de cuota vencida")
 	cuota_vencida_mora_media_mensaje = fields.Text('Mensaje')
 	cuota_vencida_mora_media_dias_despues = fields.Integer("Dias despues del vencimiento", help="Cero o negativo no se envia.")
-	cuota_vencida_mora_media_activar_segundo_envio = fields.Boolean("Activar segundo envio")# Depreciado
 	cuota_vencida_mora_media_segundo_envio_dias_despues = fields.Integer("Dias despues del vencimiento", help="Cero o negativo no se envia.")
 	cuota_vencida_mora_media_tercer_envio_dias_despues = fields.Integer("Dias despues del vencimiento", help="Cero o negativo no se envia.")
 	cuota_vencida_mora_media_cuarto_envio_dias_despues = fields.Integer("Dias despues del vencimiento", help="Cero o negativo no se envia.")
@@ -102,7 +101,23 @@ class FinancieraSmsConfig(models.Model):
 		('cantidad_cuotas', 'Cantidad de cuotas')],
 		'{{3}}', default='cantidad_cuotas',
 		help="Al usar {{3}}, sera reemplazado por este valor")
-
+	# Aviso de prestamo pendiente - Completar datos solicitud
+	prestamo_pendiente_activar = fields.Boolean("Activar mensaje de prestamo pendiente")
+	prestamo_pendiente_tipo_id = fields.Many2one('financiera.prestamo.tipo', 'Aplica para tipos de prestamos')
+	prestamo_pendiente_mensaje_1 = fields.Text('Mensaje')
+	prestamo_pendiente_mensaje_2 = fields.Text('Mensaje')
+	prestamo_pendiente_mensaje_3 = fields.Text('Mensaje')
+	prestamo_pendiente_mensaje_4 = fields.Text('Mensaje')
+	prestamo_pendiente_dias_despues = fields.Integer("Dias despues de la solicitud", help="Cero o negativo no se envia.")
+	prestamo_pendiente_segundo_envio_dias_despues = fields.Integer("Dias despues de la solicitud", help="Cero o negativo no se envia.")
+	prestamo_pendiente_tercer_envio_dias_despues = fields.Integer("Dias despues de la solicitud", help="Cero o negativo no se envia.")
+	prestamo_pendiente_cuarto_envio_dias_despues = fields.Integer("Dias despues de la solicitud", help="Cero o negativo no se envia.")
+	prestamo_pendiente_quinto_envio_dias_despues = fields.Integer("Dias despues de la solicitud", help="Cero o negativo no se envia.")
+	prestamo_pendiente_sexto_envio_dias_despues = fields.Integer("Dias despues de la solicitud", help="Cero o negativo no se envia.")
+	prestamo_pendiente_septimo_envio_dias_despues = fields.Integer("Dias despues de la solicitud", help="Cero o negativo no se envia.")
+	prestamo_pendiente_octavo_envio_dias_despues = fields.Integer("Dias despues de la solicitud", help="Cero o negativo no se envia.")
+	prestamo_pendiente_noveno_envio_dias_despues = fields.Integer("Dias despues de la solicitud", help="Cero o negativo no se envia.")
+	prestamo_pendiente_decimo_envio_dias_despues = fields.Integer("Dias despues de la solicitud", help="Cero o negativo no se envia.")
 	# Notificacion Codigo Terminos y condiciones
 	tc_codigo = fields.Boolean("Activar mensaje con codigo de terminos y condiciones.")
 	tc_mensaje = fields.Text('Mensaje', help='Usar {{1}} como codigo.')

@@ -109,6 +109,8 @@ class FinancieraSmsMessage(models.Model):
 			monto = "${:,.2f}".format(partner_id.saldo_cuotas_vencidas).replace(',', '#').replace('.', ',').replace('#', '.')
 			mensaje = mensaje.replace("monto_deuda", monto)
 			mensaje = mensaje.replace("cantidad_cuotas", str(partner_id.cantidad_cuotas_vencidas))
+		elif tipo_mensaje == 'prestamo_pendiente':
+			mensaje = mensaje.replace("nombre_cliente", partner_id.name)
 		self.body = mensaje
 
 	@api.one
@@ -284,3 +286,86 @@ class FinancieraSmsMessage(models.Model):
 									sms_configuracion_id.notificacion_deuda_var_3)
 								message_id.send()
 				# sms_configuracion_id.actualizar_saldo()
+
+
+
+	@api.model
+	def _cron_enviar_mensajes_prestamo_pendiente_sms(self):
+		cr = self.env.cr
+		uid = self.env.uid
+		fecha_actual = datetime.now()
+		company_obj = self.pool.get('res.company')
+		company_ids = company_obj.search(cr, uid, [])
+		for _id in company_ids:
+			company_id = company_obj.browse(cr, uid, _id)
+			if len(company_id.sms_configuracion_id) > 0:
+				sms_configuracion_id = company_id.sms_configuracion_id
+				# Mensaje prestamo pendiente
+				if sms_configuracion_id.prestamo_pendiente_activar:
+					fechas_de_envio = []
+					if sms_configuracion_id.prestamo_pendiente_dias_despues > 0:
+						fecha = fecha_actual - relativedelta.relativedelta(days=sms_configuracion_id.prestamo_pendiente_dias_despues)
+						fechas_de_envio.append(fecha)
+					if sms_configuracion_id.prestamo_pendiente_segundo_envio_dias_despues > 0:
+						fecha = fecha_actual - relativedelta.relativedelta(days=sms_configuracion_id.prestamo_pendiente_segundo_envio_dias_despues)
+						fechas_de_envio.append(fecha)
+					if sms_configuracion_id.prestamo_pendiente_tercer_envio_dias_despues > 0:
+						fecha = fecha_actual - relativedelta.relativedelta(days=sms_configuracion_id.prestamo_pendiente_tercer_envio_dias_despues)
+						fechas_de_envio.append(fecha)
+					if sms_configuracion_id.prestamo_pendiente_cuarto_envio_dias_despues > 0:
+						fecha = fecha_actual - relativedelta.relativedelta(days=sms_configuracion_id.prestamo_pendiente_cuarto_envio_dias_despues)
+						fechas_de_envio.append(fecha)
+					if sms_configuracion_id.prestamo_pendiente_quinto_envio_dias_despues > 0:
+						fecha = fecha_actual - relativedelta.relativedelta(days=sms_configuracion_id.prestamo_pendiente_quinto_envio_dias_despues)
+						fechas_de_envio.append(fecha)
+					if sms_configuracion_id.prestamo_pendiente_sexto_envio_dias_despues > 0:
+						fecha = fecha_actual - relativedelta.relativedelta(days=sms_configuracion_id.prestamo_pendiente_sexto_envio_dias_despues)
+						fechas_de_envio.append(fecha)
+					if sms_configuracion_id.prestamo_pendiente_septimo_envio_dias_despues > 0:
+						fecha = fecha_actual - relativedelta.relativedelta(days=sms_configuracion_id.prestamo_pendiente_septimo_envio_dias_despues)
+						fechas_de_envio.append(fecha)
+					if sms_configuracion_id.prestamo_pendiente_octavo_envio_dias_despues > 0:
+						fecha = fecha_actual - relativedelta.relativedelta(days=sms_configuracion_id.prestamo_pendiente_octavo_envio_dias_despues)
+						fechas_de_envio.append(fecha)
+					if sms_configuracion_id.prestamo_pendiente_noveno_envio_dias_despues > 0:
+						fecha = fecha_actual - relativedelta.relativedelta(days=sms_configuracion_id.prestamo_pendiente_noveno_envio_dias_despues)
+						fechas_de_envio.append(fecha)
+					if sms_configuracion_id.prestamo_pendiente_decimo_envio_dias_despues > 0:
+						fecha = fecha_actual - relativedelta.relativedelta(days=sms_configuracion_id.prestamo_pendiente_decimo_envio_dias_despues)
+						fechas_de_envio.append(fecha)
+					prestamo_obj = self.pool.get('financiera.prestamo')
+					prestamo_ids = prestamo_obj.search(cr, uid, [
+						('company_id', '=', company_id.id),
+						('fecha', 'in', fechas_de_envio)
+					])
+					partner_ids = []
+					for _id in prestamo_ids:
+						prestamo_id = prestamo_obj.browse(cr, uid, _id)
+						if prestamo_id.state == 'autorizado' and prestamo_id.app_requerimientos_completos_porcentaje < 100 and prestamo_id.prestamo_tipo_id.id == sms_configuracion_id.prestamo_pendiente_tipo_id.id:
+							if prestamo_id.partner_id.id not in partner_ids:
+								sms_message_values = {
+									'partner_id': prestamo_id.partner_id.id,
+									'config_id': sms_configuracion_id.id,
+									'to': prestamo_id.partner_id.mobile or False,
+									'tipo': 'Prestamo pendiente',
+									'company_id': company_id.id,
+								}
+								message_id = self.env['financiera.sms.message'].create(sms_message_values)
+								prestamo_pendiente_mensaje = False
+								fecha_mod = fecha_actual.day % 4
+								if fecha_mod == 0:
+									prestamo_pendiente_mensaje = sms_configuracion_id.prestamo_pendiente_mensaje_1
+								elif fecha_mod == 1:
+									prestamo_pendiente_mensaje = sms_configuracion_id.prestamo_pendiente_mensaje_2
+								elif fecha_mod == 2:
+									prestamo_pendiente_mensaje = sms_configuracion_id.prestamo_pendiente_mensaje_3
+								elif fecha_mod == 3:
+									prestamo_pendiente_mensaje = sms_configuracion_id.prestamo_pendiente_mensaje_4
+								message_id.set_message(
+									prestamo_pendiente_mensaje,
+									'prestamo_pendiente',
+									prestamo_id,
+									prestamo_id.partner_id,
+									'nombre_cliente','','')
+								message_id.send()
+								partner_ids.append(prestamo_id.partner_id.id)
